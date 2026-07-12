@@ -214,6 +214,31 @@ dart run renderkit_cli <command> [arguments]
   ```bash
   dart run renderkit_cli doctor
   ```
+  
+  ##### Manual Android Gradle Configuration
+  If the doctor check flags errors or if you need to configure Jetpack Compose manually:
+  
+  * **Groovy DSL (`android/app/build.gradle`)**:
+    ```groovy
+    android {
+        buildFeatures { compose true }
+        composeOptions { kotlinCompilerExtensionVersion '1.5.0' }
+    }
+    dependencies {
+        implementation 'androidx.compose.material3:material3:1.1.0'
+    }
+    ```
+    
+  * **Kotlin DSL (`android/app/build.gradle.kts`)**:
+    ```kotlin
+    android {
+        buildFeatures { compose = true }
+        composeOptions { kotlinCompilerExtensionVersion = "1.5.0" }
+    }
+    dependencies {
+        implementation("androidx.compose.material3:material3:1.1.0")
+    }
+    ```
 * **`generate`**: Manually triggers the compiler to parse `@RenderEntry` widgets and output native `.compose.kt` and `.swift` files.
   ```bash
   dart run renderkit_cli generate

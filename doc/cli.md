@@ -55,7 +55,40 @@ Runs native environment diagnostics for Android (Jetpack Compose) and iOS (Swift
 
 * **Purpose:** Inspects native project subfolders to prevent compilation or runtime errors during native app builds.
 * **Checks Performed:**
-  * **Android:** Verifies `buildFeatures { compose = true }` and check if Material3 dependencies are declared in `android/app/build.gradle`.
+  * **Android:** Verifies that Jetpack Compose is enabled and Material3 dependencies are declared in the Android app Gradle configuration file (`android/app/build.gradle` or `android/app/build.gradle.kts`).
+  
+    #### Manual Android Gradle Configuration
+    
+    ##### Groovy DSL (`android/app/build.gradle`):
+    ```groovy
+    android {
+        buildFeatures {
+            compose true
+        }
+        composeOptions {
+            kotlinCompilerExtensionVersion '1.5.0'
+        }
+    }
+    dependencies {
+        implementation 'androidx.compose.material3:material3:1.1.0'
+    }
+    ```
+    
+    ##### Kotlin DSL (`android/app/build.gradle.kts`):
+    ```kotlin
+    android {
+        buildFeatures {
+            compose = true
+        }
+        composeOptions {
+            kotlinCompilerExtensionVersion = "1.5.0"
+        }
+    }
+    dependencies {
+        implementation("androidx.compose.material3:material3:1.1.0")
+    }
+    ```
+    
   * **iOS:** Confirms if the iOS deployment target is at least version `13.0` inside `ios/Podfile` (SwiftUI requires iOS 13+).
 * **Example Output:**
   ```bash
