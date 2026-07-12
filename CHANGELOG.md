@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Fix example app `main.dart` code to properly call `RenderKit.initialize` and `RenderKit.registerActions`.
+
 ## 1.1.0
 
 * Introduce automated Native Navigation Engine and automated MethodChannel Event Bridge.
