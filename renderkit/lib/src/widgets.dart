@@ -92,7 +92,7 @@ class RenderContainer extends RenderWidget {
     return flutter.Container(
       width: w,
       height: h,
-      decoration: decoration?.toFlutter(),
+      decoration: decoration?.toFlutter(context),
       constraints: constraints?.toFlutter(),
       child: child?.toFlutter(context),
     );
@@ -354,7 +354,7 @@ class RenderCard extends RenderWidget {
   @override
   flutter.Widget toFlutter(flutter.BuildContext context) {
     return flutter.Container(
-      decoration: decoration?.toFlutter() ??
+      decoration: decoration?.toFlutter(context) ??
           flutter.BoxDecoration(
             color: material.Colors.white,
             borderRadius: flutter.BorderRadius.circular(8.0),
@@ -374,10 +374,14 @@ class RenderCard extends RenderWidget {
 class RenderCircleAvatar extends RenderWidget {
   final dynamic backgroundImage; // String or RenderBind<String>
   final double radius;
+  final RenderColor? backgroundColor;
+  final RenderColor? foregroundColor;
 
   const RenderCircleAvatar({
     this.backgroundImage,
     this.radius = 24.0,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   @override
@@ -387,6 +391,8 @@ class RenderCircleAvatar extends RenderWidget {
         : null;
     return material.CircleAvatar(
       radius: radius,
+      backgroundColor: backgroundColor?.toFlutter(),
+      foregroundColor: foregroundColor?.toFlutter(),
       backgroundImage: img != null
           ? (img.startsWith('http')
               ? flutter.NetworkImage(img)

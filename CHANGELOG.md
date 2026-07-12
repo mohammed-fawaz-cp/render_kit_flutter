@@ -1,3 +1,10 @@
+## 1.1.8
+
+* Add native Coil `AsyncImage` and SwiftUI image loaders for high-fidelity network and local image rendering on `RenderImage`, `RenderCircleAvatar`, and `RenderContainer`.
+* Add transitive `material-icons-extended` dependency to support all Material Icons natively.
+* Add custom background and foreground colors to `RenderCircleAvatar`.
+* Fix class braces scoping in `widgets.dart`.
+
 ## 1.1.7
 
 * Update README.md with comprehensive widget properties table listing all 20 layout, display, control, decoration, and visibility components.

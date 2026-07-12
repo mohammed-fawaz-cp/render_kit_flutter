@@ -1,3 +1,9 @@
+## 0.1.3
+
+* Add high-fidelity native image loaders using Coil AsyncImage (Compose) and SwiftUI AsyncImage.
+* Generate layout and icon imports for generated Compose views.
+* Map RenderDivider to native Compose Divider components.
+
 ## 0.1.2
 
 * Aggregate code compilation output for multiple `@RenderEntry()` widgets inside a single Dart source file to prevent duplicate writes / InvalidOutputException build failures.

@@ -93,6 +93,11 @@ class RenderKitBuilder implements Builder {
     composeBuffer.writeln('import androidx.compose.ui.graphics.Color');
     composeBuffer.writeln('import androidx.compose.foundation.shape.CircleShape');
     composeBuffer.writeln('import androidx.compose.ui.draw.clip');
+    composeBuffer.writeln('import androidx.compose.foundation.background');
+    composeBuffer.writeln('import androidx.compose.ui.layout.ContentScale');
+    composeBuffer.writeln('import coil.compose.AsyncImage');
+    composeBuffer.writeln('import androidx.compose.material.icons.Icons');
+    composeBuffer.writeln('import androidx.compose.material.icons.filled.*');
     composeBuffer.writeln();
     for (final screen in composeScreens) {
       composeBuffer.writeln(screen);

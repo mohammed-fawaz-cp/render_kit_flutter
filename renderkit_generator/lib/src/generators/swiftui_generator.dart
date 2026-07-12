@@ -108,8 +108,11 @@ class SwiftUIGenerator {
       case 'RenderImage':
         final srcVal = widget.properties['value'];
         final srcExpr = _resolveExpression(srcVal, 'String');
-        buffer.writeln('${indent}// AsyncImage placeholder for: \\($srcExpr)');
-        buffer.writeln('${indent}Text("[Image: " + $srcExpr + "]")');
+        buffer.writeln('${indent}AsyncImage(url: URL(string: $srcExpr)) { image in');
+        buffer.writeln('${indent}    image.resizable().aspectRatio(contentMode: .fit)');
+        buffer.writeln('${indent}} placeholder: {');
+        buffer.writeln('${indent}    ProgressView()');
+        buffer.writeln('${indent}}');
         break;
 
       case 'RenderIcon':
@@ -148,18 +151,50 @@ class SwiftUIGenerator {
       case 'RenderCircleAvatar':
         final radius = widget.properties['radius'] ?? 24.0;
         final diameter = radius * 2;
-        buffer.writeln('${indent}Text("[Avatar]")');
-        buffer.writeln('${indent}    .frame(width: $diameter, height: $diameter)');
-        buffer.writeln('${indent}    .clipShape(Circle())');
+        final bgImg = widget.properties['backgroundImage'];
+        final bgCol = widget.properties['backgroundColor'];
+
+        var avatarBg = 'Color.gray';
+        if (bgCol is IRProperty) {
+          final colorVal = bgCol.properties['value'];
+          if (colorVal is int) {
+            final r = ((colorVal >> 16) & 0xFF) / 255.0;
+            final g = ((colorVal >> 8) & 0xFF) / 255.0;
+            final b = (colorVal & 0xFF) / 255.0;
+            final a = ((colorVal >> 24) & 0xFF) / 255.0;
+            avatarBg = 'Color(red: $r, green: $g, blue: $b, opacity: $a)';
+          }
+        }
+
+        if (bgImg != null) {
+          final bgExpr = _resolveExpression(bgImg, 'String');
+          buffer.writeln('${indent}AsyncImage(url: URL(string: $bgExpr)) { image in');
+          buffer.writeln('${indent}    image.resizable().aspectRatio(contentMode: .fill)');
+          buffer.writeln('${indent}} placeholder: {');
+          buffer.writeln('${indent}    $avatarBg');
+          buffer.writeln('${indent}}');
+          buffer.writeln('${indent}.frame(width: $diameter, height: $diameter)');
+          buffer.writeln('${indent}.clipShape(Circle())');
+        } else {
+          buffer.writeln('${indent}Circle()');
+          buffer.writeln('${indent}    .fill($avatarBg)');
+          buffer.writeln('${indent}    .frame(width: $diameter, height: $diameter)');
+        }
         break;
 
       case 'RenderCard':
+        final decorationProp = widget.properties['decoration'];
+        final bgStr = decorationProp != null ? _parseContainerBackground(decorationProp) : '';
         buffer.writeln('${indent}VStack {');
         for (final child in widget.children) {
           buffer.write(_generateWidget(child, '$indent    ', eventCallback));
         }
         buffer.writeln('${indent}}');
-        buffer.writeln('${indent}.background(Color.white)');
+        if (bgStr.isNotEmpty) {
+          buffer.writeln('${indent}.background($bgStr)');
+        } else {
+          buffer.writeln('${indent}.background(Color.white)');
+        }
         buffer.writeln('${indent}.cornerRadius(8)');
         buffer.writeln('${indent}.shadow(radius: 4)');
         break;
@@ -259,6 +294,11 @@ class SwiftUIGenerator {
 
   String _parseContainerBackground(dynamic deco) {
     if (deco is IRProperty) {
+      final bgImg = deco.properties['backgroundImage'];
+      if (bgImg != null) {
+        final bgExpr = _resolveExpression(bgImg, 'String');
+        return 'AnyView(AsyncImage(url: URL(string: $bgExpr)) { image in image.resizable().aspectRatio(contentMode: .fill) } placeholder: { Color.clear })';
+      }
       final color = deco.properties['color'];
       if (color is IRProperty) {
         final colorVal = color.properties['value'];

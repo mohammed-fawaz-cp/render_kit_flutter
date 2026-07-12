@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart' as flutter;
+import 'state.dart';
 
 class RenderColor {
   final int value;
@@ -112,20 +113,35 @@ class RenderDecoration {
   final RenderBorder? border;
   final RenderBorderRadius? borderRadius;
   final List<RenderShadow>? shadows;
+  final dynamic backgroundImage; // String or RenderBind<String>
 
   const RenderDecoration({
     this.color,
     this.border,
     this.borderRadius,
     this.shadows,
+    this.backgroundImage,
   });
 
-  flutter.BoxDecoration toFlutter() => flutter.BoxDecoration(
-    color: color?.toFlutter(),
-    border: border?.toFlutter(),
-    borderRadius: borderRadius?.toFlutter(),
-    boxShadow: shadows?.map((s) => s.toFlutter()).toList(),
-  );
+  flutter.BoxDecoration toFlutter(flutter.BuildContext context) {
+    final String? img = backgroundImage != null
+        ? resolveValue<String>(context, backgroundImage)
+        : null;
+    return flutter.BoxDecoration(
+      color: color?.toFlutter(),
+      border: border?.toFlutter(),
+      borderRadius: borderRadius?.toFlutter(),
+      boxShadow: shadows?.map((s) => s.toFlutter()).toList(),
+      image: img != null
+          ? flutter.DecorationImage(
+              image: img.startsWith('http')
+                  ? flutter.NetworkImage(img)
+                  : flutter.AssetImage(img) as flutter.ImageProvider,
+              fit: flutter.BoxFit.cover,
+            )
+          : null,
+    );
+  }
 }
 
 class RenderShadow {

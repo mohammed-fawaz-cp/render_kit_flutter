@@ -15,6 +15,11 @@ class ComposeGenerator {
     buffer.writeln('import androidx.compose.ui.graphics.Color');
     buffer.writeln('import androidx.compose.foundation.shape.CircleShape');
     buffer.writeln('import androidx.compose.ui.draw.clip');
+    buffer.writeln('import androidx.compose.foundation.background');
+    buffer.writeln('import androidx.compose.ui.layout.ContentScale');
+    buffer.writeln('import coil.compose.AsyncImage');
+    buffer.writeln('import androidx.compose.material.icons.Icons');
+    buffer.writeln('import androidx.compose.material.icons.filled.*');
     buffer.writeln();
     buffer.writeln(generateScreen(className, rootWidget));
     return buffer.toString();
@@ -104,6 +109,18 @@ class ComposeGenerator {
         final decorationProp = widget.properties['decoration'];
         final modifierStr = _parseContainerModifier(widget.properties, decorationProp);
         buffer.writeln('${indent}Box(modifier = $modifierStr) {');
+        if (decorationProp is IRProperty) {
+          final bgImg = decorationProp.properties['backgroundImage'];
+          if (bgImg != null) {
+            final bgExpr = _resolveExpression(bgImg, 'String');
+            buffer.writeln('${indent}    AsyncImage(');
+            buffer.writeln('${indent}        model = $bgExpr,');
+            buffer.writeln('${indent}        contentDescription = null,');
+            buffer.writeln('${indent}        contentScale = ContentScale.Crop,');
+            buffer.writeln('${indent}        modifier = Modifier.matchParentSize()');
+            buffer.writeln('${indent}    )');
+          }
+        }
         for (final child in widget.children) {
           buffer.write(_generateWidget(child, '$indent    ', eventCallback));
         }
@@ -119,8 +136,11 @@ class ComposeGenerator {
       case 'RenderImage':
         final srcVal = widget.properties['value'];
         final srcExpr = _resolveExpression(srcVal, 'String');
-        buffer.writeln('${indent}// AsyncImage placeholder for: $srcExpr');
-        buffer.writeln('${indent}Text(text = "[Image: " + $srcExpr + "]")');
+        buffer.writeln('${indent}AsyncImage(');
+        buffer.writeln('${indent}    model = $srcExpr,');
+        buffer.writeln('${indent}    contentDescription = null,');
+        buffer.writeln('${indent}    modifier = Modifier.fillMaxWidth()');
+        buffer.writeln('${indent})');
         break;
 
       case 'RenderIcon':
@@ -129,7 +149,7 @@ class ComposeGenerator {
         break;
 
       case 'RenderDivider':
-        buffer.writeln('${indent}HorizontalDivider()');
+        buffer.writeln('${indent}Divider()');
         break;
 
       case 'RenderButton':
@@ -159,20 +179,59 @@ class ComposeGenerator {
       case 'RenderCircleAvatar':
         final radius = widget.properties['radius'] ?? 24.0;
         final size = radius * 2;
+        final bgImg = widget.properties['backgroundImage'];
+        final bgCol = widget.properties['backgroundColor'];
+
+        var avatarModifier = 'Modifier.size(${size}.dp).clip(CircleShape)';
+        if (bgCol is IRProperty) {
+          final colorVal = bgCol.properties['value'];
+          if (colorVal is int) {
+            final hex = colorVal.toRadixString(16).padLeft(8, '0');
+            avatarModifier += '.background(Color(0x$hex))';
+          }
+        } else {
+          if (bgImg == null) {
+            avatarModifier += '.background(Color.Gray)';
+          }
+        }
+
         buffer.writeln('${indent}Box(');
-        buffer.writeln('${indent}    modifier = Modifier');
-        buffer.writeln('${indent}        .size(${size}.dp)');
-        buffer.writeln('${indent}        .clip(CircleShape)');
+        buffer.writeln('${indent}    modifier = $avatarModifier');
         buffer.writeln('${indent}) {');
-        buffer.writeln('${indent}    Text("[Avatar]", modifier = Modifier.align(Alignment.Center))');
+        if (bgImg != null) {
+          final bgExpr = _resolveExpression(bgImg, 'String');
+          buffer.writeln('${indent}    AsyncImage(');
+          buffer.writeln('${indent}        model = $bgExpr,');
+          buffer.writeln('${indent}        contentDescription = null,');
+          buffer.writeln('${indent}        contentScale = ContentScale.Crop,');
+          buffer.writeln('${indent}        modifier = Modifier.fillMaxSize()');
+          buffer.writeln('${indent}    )');
+        } else {
+          buffer.writeln('${indent}    Text("[Avatar]", modifier = Modifier.align(Alignment.Center))');
+        }
         buffer.writeln('${indent}}');
         break;
 
       case 'RenderCard':
+        final decorationProp = widget.properties['decoration'];
         buffer.writeln('${indent}Card(modifier = Modifier.fillMaxWidth()) {');
-        for (final child in widget.children) {
-          buffer.write(_generateWidget(child, '$indent    ', eventCallback));
+        buffer.writeln('${indent}    Box(modifier = Modifier.fillMaxWidth()) {');
+        if (decorationProp is IRProperty) {
+          final bgImg = decorationProp.properties['backgroundImage'];
+          if (bgImg != null) {
+            final bgExpr = _resolveExpression(bgImg, 'String');
+            buffer.writeln('${indent}        AsyncImage(');
+            buffer.writeln('${indent}            model = $bgExpr,');
+            buffer.writeln('${indent}            contentDescription = null,');
+            buffer.writeln('${indent}            contentScale = ContentScale.Crop,');
+            buffer.writeln('${indent}            modifier = Modifier.matchParentSize()');
+            buffer.writeln('${indent}        )');
+          }
         }
+        for (final child in widget.children) {
+          buffer.write(_generateWidget(child, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    }');
         buffer.writeln('${indent}}');
         break;
 
