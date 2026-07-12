@@ -1,3 +1,7 @@
+## 1.1.6
+
+* Update README.md with detailed documentation for dynamic screen registration, initialization APIs, and FCM background notification guidelines.
+
 ## 1.1.5
 
 * Automatically call `WidgetsFlutterBinding.ensureInitialized()` in `RenderKit.initialize()` to prevent binary messenger platform channel setup crash.
