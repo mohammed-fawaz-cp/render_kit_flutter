@@ -299,8 +299,8 @@ The generator produces a standard `@Composable` function named after your annota
 import androidx.compose.runtime.*
 
 // Inside your Jetpack Compose activity/view:
-IncomingCallScreen(
-    state = mapOf("callerName" to "John Doe"),
+YourWidgetName(
+    state = mapOf("variableName" to "Value"),
     onEvent = { actionName, args ->
         // Handle action click natively or pipe it back to Flutter
         println("Native clicked Action: $actionName")
@@ -315,10 +315,10 @@ The generator produces a standard SwiftUI `View` struct. It also accepts a `stat
 import SwiftUI
 
 // Inside your SwiftUI view controller or layout:
-struct NativeCallView: View {
+struct MyNativeView: View {
     var body: some View {
-        IncomingCallScreen(
-            state: ["callerName": "John Doe"],
+        YourWidgetName(
+            state: ["variableName": "Value"],
             onEvent: { actionName, args in
                 // Handle action click natively
                 print("Native clicked Action: \(actionName)")
