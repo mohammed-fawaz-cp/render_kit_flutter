@@ -1,0 +1,7 @@
+builders:
+  renderKitBuilder:
+    import: "package:renderkit_generator/renderkit_generator.dart"
+    builder_factories: ["renderKitBuilder"]
+    build_extensions: {".dart": [".compose.kt", ".swift"]}
+    auto_apply: dependents
+    build_to: source

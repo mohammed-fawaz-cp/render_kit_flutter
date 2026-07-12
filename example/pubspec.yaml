@@ -1,0 +1,32 @@
+name: render_kit_example
+description: "Demonstrates how to use the render_kit plugin."
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  render_kit:
+    path: ../
+  renderkit:
+    path: ../renderkit
+  renderkit_annotations:
+    path: ../renderkit_annotations
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.0
+  renderkit_generator:
+    path: ../renderkit_generator
+  renderkit_cli:
+    path: ../renderkit_cli
+
+flutter:
+  uses-material-design: true

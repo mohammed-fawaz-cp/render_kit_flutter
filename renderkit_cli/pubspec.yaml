@@ -1,0 +1,14 @@
+name: renderkit_cli
+description: CLI tool for RenderKit to validate environments, configure pipelines, and compile widgets.
+version: 0.1.0
+homepage: https://github.com/renderkit/render_kit/tree/main/renderkit_cli
+repository: https://github.com/renderkit/render_kit
+issue_tracker: https://github.com/renderkit/render_kit/issues
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  args: ^2.4.0
+  path: ^1.8.0
+  io: ^1.0.0
