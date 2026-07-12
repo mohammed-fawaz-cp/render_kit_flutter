@@ -17,6 +17,9 @@ It also includes a high-fidelity **Flutter Preview Renderer** to support fast ho
    * [Step 3: Run the Compiler](#step-3-run-the-compiler)
    * [Step 4: Preview in Flutter](#step-4-preview-in-flutter)
 4. [Native Platform Setup](#-native-platform-setup)
+   * [Android (Jetpack Compose & Material 3)](#-android-jetpack-compose--material-3)
+   * [iOS (SwiftUI iOS 13+ Target)](#-ios-swiftui-ios-13-target)
+   * [Integrating Generated Native Code](#-integrating-generated-native-code)
 5. [Event & Stream Pipeline](#-event--stream-pipeline)
 6. [CLI Toolchain & Commands](#-cli-toolchain--commands)
 7. [Supported Widgets](#-supported-widgets)
@@ -173,51 +176,58 @@ Before building your application for Android or iOS, the native project files mu
 
 ### 🤖 Android (Jetpack Compose & Material 3)
 
-By default, standard Flutter apps do not have Jetpack Compose enabled. You must enable it in your Android app-level build configuration.
+By default, standard Flutter apps do not have Jetpack Compose enabled. You must enable it in your Android build configuration.
 
-Depending on your Flutter version, configure either Groovy DSL or Kotlin DSL:
+#### 1. Enabling Jetpack Compose (Kotlin 2.0+ vs Kotlin 1.x)
 
-#### Option A: Groovy DSL (`android/app/build.gradle`)
-Open `android/app/build.gradle` and append/modify the following blocks:
+Depending on your project's Kotlin version, use one of the following configurations:
+
+##### For Kotlin 2.0+ (Modern Flutter Projects)
+Starting in Kotlin 2.0, Jetpack Compose requires the official **Compose Compiler Gradle plugin** instead of `composeOptions`.
+
+1. Open your project-level `android/build.gradle.kts` (or `android/build.gradle`) and add the Compose Compiler plugin to the `plugins` block:
+   ```kotlin
+   plugins {
+       // ... existing plugins
+       id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" apply false // Match your Kotlin version
+   }
+   ```
+2. Open your app-level `android/app/build.gradle.kts` (or `android/app/build.gradle`), apply the plugin at the top, and enable Compose:
+   ```kotlin
+   plugins {
+       // ... existing plugins
+       id("org.jetbrains.kotlin.plugin.compose")
+   }
+
+   android {
+       // ... existing configurations
+       buildFeatures {
+           compose = true
+       }
+   }
+   ```
+
+##### For Kotlin 1.x (Older Flutter Projects)
+Open your app-level `android/app/build.gradle` (or `android/app/build.gradle.kts`) and add:
 ```groovy
 android {
     // ... existing configurations
-
     buildFeatures {
-        compose true
+        compose true // (use compose = true in .kts)
     }
-
     composeOptions {
         // Must match your project's Kotlin compiler compatibility
-        kotlinCompilerExtensionVersion '1.5.0'
+        kotlinCompilerExtensionVersion '1.5.0' // (use = "1.5.0" in .kts)
     }
-}
-
-dependencies {
-    // Add Material 3 Compose dependency
-    implementation 'androidx.compose.material3:material3:1.1.0'
 }
 ```
 
-#### Option B: Kotlin DSL (`android/app/build.gradle.kts`)
-Open `android/app/build.gradle.kts` and append/modify the following blocks:
-```kotlin
-android {
-    // ... existing configurations
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        // Must match your project's Kotlin compiler compatibility
-        kotlinCompilerExtensionVersion = "1.5.0"
-    }
-}
-
+#### 2. Adding Material 3 & Compose Dependencies
+Add the Material 3 dependency inside the `dependencies { ... }` block in `android/app/build.gradle` (or `.kts`):
+```groovy
 dependencies {
-    // Add Material 3 Compose dependency
-    implementation("androidx.compose.material3:material3:1.1.0")
+    // ... existing dependencies
+    implementation 'androidx.compose.material3:material3:1.1.0' // (use implementation(...) in .kts)
 }
 ```
 
@@ -231,7 +241,50 @@ SwiftUI requires a minimum deployment target of **iOS 13.0** or later.
    ```ruby
    platform :ios, '13.0'
    ```
-2. Open your project in Xcode and update the **Minimum Deployments** target under the Target build settings to `13.0`.
+2. Open your project in Xcode and update the **Minimum Deployments** target under the target's build settings to `13.0`.
+
+---
+
+### 🔗 Integrating Generated Native Code
+
+When you compile your Dart widgets (via `dart run build_runner build` or `dart run renderkit_cli generate`), RenderKit generates native UI source files inside your Flutter project's `lib/` directory:
+- `lib/incoming_call_screen.compose.kt`
+- `lib/incoming_call_screen.swift`
+
+Here is how to integrate these generated files into your native build pipelines:
+
+#### Android: Automatic Compilation via SourceSets
+Instead of manually copying the generated `.kt` files into your native folders, configure Gradle to treat the Flutter `lib/` folder as a Kotlin source directory:
+
+* **For Kotlin DSL (`android/app/build.gradle.kts`)**:
+  Add the following inside the `android { ... }` block:
+  ```kotlin
+  android {
+      // ... existing configurations
+      sourceSets {
+          getByName("main").java.srcDirs("src/main/java", "../../lib")
+      }
+  }
+  ```
+* **For Groovy DSL (`android/app/build.gradle`)**:
+  Add the following inside the `android { ... }` block:
+  ```groovy
+  android {
+      // ... existing configurations
+      sourceSets {
+          main.java.srcDirs += '../../lib'
+      }
+  }
+  ```
+
+#### iOS: Drag & Drop Reference in Xcode
+To compile the generated `.swift` files:
+1. Open the `ios/` folder of your project in Xcode.
+2. Drag and drop the generated Swift files (e.g. `lib/incoming_call_screen.swift`) into the Xcode file navigator under the `Runner` group.
+3. In the popup that appears:
+   - **Uncheck** "Copy items if needed" (this ensures Xcode references the files in-place, meaning it automatically picks up updates when you re-compile/re-generate).
+   - Select **"Create groups"**.
+   - Make sure **"Runner"** is checked under **"Add to targets"**.
 
 ---
 
