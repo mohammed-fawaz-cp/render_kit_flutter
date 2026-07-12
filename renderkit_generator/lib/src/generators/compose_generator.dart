@@ -96,6 +96,38 @@ class ComposeGenerator {
         buffer.writeln('${indent}}');
         break;
 
+      case 'RenderPositioned':
+        final child = widget.children.first;
+        final left = widget.properties['left'] ?? 0.0;
+        final top = widget.properties['top'] ?? 0.0;
+        final right = widget.properties['right'];
+        final bottom = widget.properties['bottom'];
+
+        var align = 'Alignment.TopStart';
+        var offsetX = '$left.dp';
+        var offsetY = '$top.dp';
+
+        if (right != null && bottom != null) {
+          align = 'Alignment.BottomEnd';
+          offsetX = '-$right.dp';
+          offsetY = '-$bottom.dp';
+        } else if (right != null) {
+          align = 'Alignment.TopEnd';
+          offsetX = '-$right.dp';
+        } else if (bottom != null) {
+          align = 'Alignment.BottomStart';
+          offsetY = '-$bottom.dp';
+        }
+
+        buffer.writeln('${indent}Box(');
+        buffer.writeln('${indent}    modifier = Modifier');
+        buffer.writeln('${indent}        .align($align)');
+        buffer.writeln('${indent}        .absoluteOffset(x = $offsetX, y = $offsetY)');
+        buffer.writeln('${indent}) {');
+        buffer.write(_generateWidget(child, '$indent    ', eventCallback));
+        buffer.writeln('${indent}}');
+        break;
+
       case 'RenderPadding':
         final child = widget.children.first;
         final paddingProp = widget.properties['padding'];
@@ -248,12 +280,66 @@ class ComposeGenerator {
       case 'RenderIf':
         final condVal = widget.properties['condition'];
         final condExpr = _resolveExpression(condVal, 'Boolean');
-        final trueChild = widget.children[0];
-        final falseChild = widget.children[1];
+        final trueChild = widget.properties['trueChild'] as IRWidget?;
+        final falseChild = widget.properties['falseChild'] as IRWidget?;
         buffer.writeln('${indent}if ($condExpr) {');
-        buffer.write(_generateWidget(trueChild, '$indent    ', eventCallback));
+        if (trueChild != null) {
+          buffer.write(_generateWidget(trueChild, '$indent    ', eventCallback));
+        }
         buffer.writeln('${indent}} else {');
-        buffer.write(_generateWidget(falseChild, '$indent    ', eventCallback));
+        if (falseChild != null) {
+          buffer.write(_generateWidget(falseChild, '$indent    ', eventCallback));
+        }
+        buffer.writeln('${indent}}');
+        break;
+
+      case 'RenderSwitch':
+        final switchVal = widget.properties['value'];
+        final switchExpr = _resolveExpression(switchVal, 'String');
+        final casesMap = widget.properties['cases'];
+        final defaultChild = widget.properties['defaultChild'] as IRWidget?;
+        buffer.writeln('${indent}when ($switchExpr) {');
+        if (casesMap is Map<String, dynamic>) {
+          casesMap.forEach((key, val) {
+            if (val is IRWidget) {
+              buffer.writeln('${indent}    "$key" -> {');
+              buffer.write(_generateWidget(val, '$indent        ', eventCallback));
+              buffer.writeln('${indent}    }');
+            }
+          });
+        }
+        buffer.writeln('${indent}    else -> {');
+        if (defaultChild != null) {
+          buffer.write(_generateWidget(defaultChild, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    }');
+        buffer.writeln('${indent}}');
+        break;
+
+      case 'RenderResponsive':
+        final mobile = widget.properties['mobile'] as IRWidget?;
+        final tablet = widget.properties['tablet'] as IRWidget?;
+        final desktop = widget.properties['desktop'] as IRWidget?;
+        buffer.writeln('${indent}BoxWithConstraints {');
+        buffer.writeln('${indent}    if (maxWidth < 600.dp) {');
+        if (mobile != null) {
+          buffer.write(_generateWidget(mobile, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    } else if (maxWidth < 960.dp) {');
+        if (tablet != null) {
+          buffer.write(_generateWidget(tablet, '$indent        ', eventCallback));
+        } else if (mobile != null) {
+          buffer.write(_generateWidget(mobile, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    } else {');
+        if (desktop != null) {
+          buffer.write(_generateWidget(desktop, '$indent        ', eventCallback));
+        } else if (tablet != null) {
+          buffer.write(_generateWidget(tablet, '$indent        ', eventCallback));
+        } else if (mobile != null) {
+          buffer.write(_generateWidget(mobile, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    }');
         buffer.writeln('${indent}}');
         break;
 

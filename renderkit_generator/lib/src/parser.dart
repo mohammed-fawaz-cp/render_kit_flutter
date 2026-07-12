@@ -88,6 +88,18 @@ class RenderKitParser {
           .map((e) => _parseExpression(e as Expression))
           .where((e) => e != null)
           .toList();
+    } else if (expr is SetOrMapLiteral) {
+      final map = <String, dynamic>{};
+      for (final element in expr.elements) {
+        if (element is MapLiteralEntry) {
+          final key = _parseExpression(element.key);
+          final value = _parseExpression(element.value);
+          if (key is String) {
+            map[key] = value;
+          }
+        }
+      }
+      return map;
     } else if (expr is InstanceCreationExpression) {
       final className = expr.constructorName.type.toSource();
       final constructorName = expr.constructorName.name?.name;

@@ -78,6 +78,34 @@ class SwiftUIGenerator {
         buffer.writeln('${indent}}.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .${_mapAlignment(alignVal)})');
         break;
 
+      case 'RenderPositioned':
+        final child = widget.children.first;
+        final left = widget.properties['left'] ?? 0.0;
+        final top = widget.properties['top'] ?? 0.0;
+        final right = widget.properties['right'];
+        final bottom = widget.properties['bottom'];
+
+        var align = '.topLeading';
+        var offsetX = '$left';
+        var offsetY = '$top';
+
+        if (right != null && bottom != null) {
+          align = '.bottomTrailing';
+          offsetX = '-$right';
+          offsetY = '-$bottom';
+        } else if (right != null) {
+          align = '.topTrailing';
+          offsetX = '-$right';
+        } else if (bottom != null) {
+          align = '.bottomLeading';
+          offsetY = '-$bottom';
+        }
+
+        buffer.write(_generateWidget(child, indent, eventCallback));
+        buffer.writeln('${indent}    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: $align)');
+        buffer.writeln('${indent}    .offset(x: $offsetX, y: $offsetY)');
+        break;
+
       case 'RenderPadding':
         final child = widget.children.first;
         final paddingProp = widget.properties['padding'];
@@ -212,12 +240,64 @@ class SwiftUIGenerator {
       case 'RenderIf':
         final condVal = widget.properties['condition'];
         final condExpr = _resolveExpression(condVal, 'Boolean');
-        final trueChild = widget.children[0];
-        final falseChild = widget.children[1];
+        final trueChild = widget.properties['trueChild'] as IRWidget?;
+        final falseChild = widget.properties['falseChild'] as IRWidget?;
         buffer.writeln('${indent}if $condExpr {');
-        buffer.write(_generateWidget(trueChild, '$indent    ', eventCallback));
+        if (trueChild != null) {
+          buffer.write(_generateWidget(trueChild, '$indent    ', eventCallback));
+        }
         buffer.writeln('${indent}} else {');
-        buffer.write(_generateWidget(falseChild, '$indent    ', eventCallback));
+        if (falseChild != null) {
+          buffer.write(_generateWidget(falseChild, '$indent    ', eventCallback));
+        }
+        buffer.writeln('${indent}}');
+        break;
+
+      case 'RenderSwitch':
+        final switchVal = widget.properties['value'];
+        final switchExpr = _resolveExpression(switchVal, 'String');
+        final casesMap = widget.properties['cases'];
+        final defaultChild = widget.properties['defaultChild'] as IRWidget?;
+        buffer.writeln('${indent}switch $switchExpr {');
+        if (casesMap is Map<String, dynamic>) {
+          casesMap.forEach((key, val) {
+            if (val is IRWidget) {
+              buffer.writeln('${indent}case "$key":');
+              buffer.write(_generateWidget(val, '$indent    ', eventCallback));
+            }
+          });
+        }
+        buffer.writeln('${indent}default:');
+        if (defaultChild != null) {
+          buffer.write(_generateWidget(defaultChild, '$indent    ', eventCallback));
+        }
+        buffer.writeln('${indent}}');
+        break;
+
+      case 'RenderResponsive':
+        final mobile = widget.properties['mobile'] as IRWidget?;
+        final tablet = widget.properties['tablet'] as IRWidget?;
+        final desktop = widget.properties['desktop'] as IRWidget?;
+        buffer.writeln('${indent}GeometryReader { geometry in');
+        buffer.writeln('${indent}    if geometry.size.width < 600 {');
+        if (mobile != null) {
+          buffer.write(_generateWidget(mobile, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    } else if geometry.size.width < 960 {');
+        if (tablet != null) {
+          buffer.write(_generateWidget(tablet, '$indent        ', eventCallback));
+        } else if (mobile != null) {
+          buffer.write(_generateWidget(mobile, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    } else {');
+        if (desktop != null) {
+          buffer.write(_generateWidget(desktop, '$indent        ', eventCallback));
+        } else if (tablet != null) {
+          buffer.write(_generateWidget(tablet, '$indent        ', eventCallback));
+        } else if (mobile != null) {
+          buffer.write(_generateWidget(mobile, '$indent        ', eventCallback));
+        }
+        buffer.writeln('${indent}    }');
         buffer.writeln('${indent}}');
         break;
 

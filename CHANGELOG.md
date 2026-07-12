@@ -1,3 +1,9 @@
+## 1.1.9
+
+* Support native layout generation and compiling for `RenderPositioned`, `RenderSwitch`, and `RenderResponsive` widgets.
+* Support map literals parsing in the AST parser for `RenderSwitch` cases.
+* Fix `RenderIf` RangeError compilation bugs inside Swift and Kotlin code generators.
+
 ## 1.1.8
 
 * Add native Coil `AsyncImage` and SwiftUI image loaders for high-fidelity network and local image rendering on `RenderImage`, `RenderCircleAvatar`, and `RenderContainer`.

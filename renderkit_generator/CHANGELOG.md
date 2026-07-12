@@ -1,3 +1,9 @@
+## 0.1.4
+
+* Support code generation for `RenderPositioned`, `RenderSwitch`, and `RenderResponsive`.
+* Support map literals parsing in the AST parser.
+* Fix `RenderIf` RangeError compilation bugs inside Swift and Kotlin code generators.
+
 ## 0.1.3
 
 * Add high-fidelity native image loaders using Coil AsyncImage (Compose) and SwiftUI AsyncImage.
