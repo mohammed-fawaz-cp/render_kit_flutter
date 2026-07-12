@@ -18,6 +18,9 @@ class RenderKitBuilder implements Builder {
     
     final library = await resolver.libraryFor(buildStep.inputId);
 
+    final composeScreens = <String>[];
+    final swiftScreens = <String>[];
+
     final composeGen = ComposeGenerator();
     final swiftGen = SwiftUIGenerator();
 
@@ -33,50 +36,81 @@ class RenderKitBuilder implements Builder {
         }
         if (!hasRenderEntry) continue;
 
-      final astUnit = await resolver.compilationUnitFor(buildStep.inputId);
-      final className = classElement.name;
+        final astUnit = await resolver.compilationUnitFor(buildStep.inputId);
+        final className = classElement.name;
 
-      ClassDeclaration? classNode;
-      for (final decl in astUnit.declarations) {
-        if (decl is ClassDeclaration && decl.name.lexeme == className) {
-          classNode = decl;
-          break;
+        ClassDeclaration? classNode;
+        for (final decl in astUnit.declarations) {
+          if (decl is ClassDeclaration && decl.name.lexeme == className) {
+            classNode = decl;
+            break;
+          }
         }
-      }
-      if (classNode == null) continue;
+        if (classNode == null) continue;
 
-      MethodDeclaration? buildMethodNode;
-      for (final member in classNode.members) {
-        if (member is MethodDeclaration && member.name.lexeme == 'build') {
-          buildMethodNode = member;
-          break;
+        MethodDeclaration? buildMethodNode;
+        for (final member in classNode.members) {
+          if (member is MethodDeclaration && member.name.lexeme == 'build') {
+            buildMethodNode = member;
+            break;
+          }
         }
-      }
-      if (buildMethodNode == null) continue;
+        if (buildMethodNode == null) continue;
 
-      final parser = RenderKitParser();
-      final irWidget = parser.parseBuildMethod(buildMethodNode);
+        final parser = RenderKitParser();
+        final irWidget = parser.parseBuildMethod(buildMethodNode);
 
-      if (parser.diagnostics.isNotEmpty) {
-        for (final diag in parser.diagnostics) {
-          log.warning('[RenderKit Compiler Diagnostic] $diag');
+        if (parser.diagnostics.isNotEmpty) {
+          for (final diag in parser.diagnostics) {
+            log.warning('[RenderKit Compiler Diagnostic] $diag');
+          }
         }
-      }
 
-      if (irWidget == null) continue;
+        if (irWidget == null) continue;
 
+        // Generate individual Compose screen code
+        final composeScreen = composeGen.generateScreen(className, irWidget);
+        composeScreens.add(composeScreen);
 
-      // Generate Compose
-      final composeCode = composeGen.generate(className, irWidget);
-      final composeAsset = buildStep.inputId.changeExtension('.compose.kt');
-      await buildStep.writeAsString(composeAsset, composeCode);
-
-      // Generate SwiftUI
-      final swiftCode = swiftGen.generate(className, irWidget);
-      final swiftAsset = buildStep.inputId.changeExtension('.swift');
-      await buildStep.writeAsString(swiftAsset, swiftCode);
+        // Generate individual SwiftUI screen code
+        final swiftScreen = swiftGen.generateScreen(className, irWidget);
+        swiftScreens.add(swiftScreen);
       }
     }
+
+    if (composeScreens.isEmpty && swiftScreens.isEmpty) return;
+
+    // Write Compose once with package/imports
+    final composeBuffer = StringBuffer();
+    composeBuffer.writeln('package com.renderkit.generated');
+    composeBuffer.writeln();
+    composeBuffer.writeln('import androidx.compose.runtime.*');
+    composeBuffer.writeln('import androidx.compose.ui.*');
+    composeBuffer.writeln('import androidx.compose.foundation.layout.*');
+    composeBuffer.writeln('import androidx.compose.material3.*');
+    composeBuffer.writeln('import androidx.compose.ui.unit.dp');
+    composeBuffer.writeln('import androidx.compose.ui.unit.sp');
+    composeBuffer.writeln('import androidx.compose.ui.graphics.Color');
+    composeBuffer.writeln('import androidx.compose.foundation.shape.CircleShape');
+    composeBuffer.writeln('import androidx.compose.ui.draw.clip');
+    composeBuffer.writeln();
+    for (final screen in composeScreens) {
+      composeBuffer.writeln(screen);
+      composeBuffer.writeln();
+    }
+    final composeAsset = buildStep.inputId.changeExtension('.compose.kt');
+    await buildStep.writeAsString(composeAsset, composeBuffer.toString());
+
+    // Write SwiftUI once with imports
+    final swiftBuffer = StringBuffer();
+    swiftBuffer.writeln('import SwiftUI');
+    swiftBuffer.writeln();
+    for (final screen in swiftScreens) {
+      swiftBuffer.writeln(screen);
+      swiftBuffer.writeln();
+    }
+    final swiftAsset = buildStep.inputId.changeExtension('.swift');
+    await buildStep.writeAsString(swiftAsset, swiftBuffer.toString());
   }
 }
 

@@ -1,3 +1,8 @@
+## 0.1.4
+
+* Exclude registry initializer files (`RenderKitRegistry.compose.kt` / `RenderKitRegistry.swift`) from directory scan during generation.
+* Use `allMatches` RegExp scan to extract multiple screens from a single layout file instead of `firstMatch`.
+
 ## 0.1.3
 
 * Update generation to output dynamic `RenderKitRegistryInitializer` runtime mapping to support clean multi-module compiles and prevent circular dependency errors.

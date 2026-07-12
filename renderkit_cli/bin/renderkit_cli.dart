@@ -210,7 +210,7 @@ void generateRegistries() {
     for (final entity in dir.listSync(recursive: true)) {
       if (entity is File) {
         final path = entity.path;
-        if (path.endsWith('.compose.kt')) {
+        if (path.endsWith('.compose.kt') && !path.endsWith('RenderKitRegistry.compose.kt')) {
           composeFiles.add(entity);
         } else if (path.endsWith('.swift') && !path.endsWith('RenderKitRegistry.swift')) {
           swiftFiles.add(entity);
@@ -224,8 +224,8 @@ void generateRegistries() {
   final composeScreens = <String>[];
   for (final file in composeFiles) {
     final content = file.readAsStringSync();
-    final match = RegExp(r'fun\s+(\w+)\s*\(').firstMatch(content);
-    if (match != null) {
+    final matches = RegExp(r'fun\s+(\w+)\s*\(').allMatches(content);
+    for (final match in matches) {
       composeScreens.add(match.group(1)!);
     }
   }
@@ -233,8 +233,8 @@ void generateRegistries() {
   final swiftScreens = <String>[];
   for (final file in swiftFiles) {
     final content = file.readAsStringSync();
-    final match = RegExp(r'struct\s+(\w+)\s*:\s*View').firstMatch(content);
-    if (match != null) {
+    final matches = RegExp(r'struct\s+(\w+)\s*:\s*View').allMatches(content);
+    for (final match in matches) {
       swiftScreens.add(match.group(1)!);
     }
   }

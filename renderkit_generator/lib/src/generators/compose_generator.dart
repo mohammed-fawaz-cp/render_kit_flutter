@@ -16,6 +16,12 @@ class ComposeGenerator {
     buffer.writeln('import androidx.compose.foundation.shape.CircleShape');
     buffer.writeln('import androidx.compose.ui.draw.clip');
     buffer.writeln();
+    buffer.writeln(generateScreen(className, rootWidget));
+    return buffer.toString();
+  }
+
+  String generateScreen(String className, IRWidget rootWidget) {
+    final buffer = StringBuffer();
     buffer.writeln('@Composable');
     buffer.writeln('fun $className(');
     buffer.writeln('    state: Map<String, Any>,');

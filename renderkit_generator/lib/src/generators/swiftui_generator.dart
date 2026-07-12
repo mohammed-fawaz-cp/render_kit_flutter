@@ -5,14 +5,18 @@ class SwiftUIGenerator {
     final buffer = StringBuffer();
     buffer.writeln('import SwiftUI');
     buffer.writeln();
+    buffer.writeln(generateScreen(className, rootWidget));
+    return buffer.toString();
+  }
+
+  String generateScreen(String className, IRWidget rootWidget) {
+    final buffer = StringBuffer();
     buffer.writeln('struct $className: View {');
     buffer.writeln('    let state: [String: Any]');
     buffer.writeln('    let onEvent: (String, [String: Any]) -> Void');
     buffer.writeln();
     buffer.writeln('    var body: some View {');
-    
     buffer.write(_generateWidget(rootWidget, '        ', 'onEvent'));
-
     buffer.writeln('    }');
     buffer.writeln('}');
     return buffer.toString();
