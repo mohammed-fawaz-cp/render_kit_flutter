@@ -288,142 +288,58 @@ To compile the generated `.swift` files:
 
 ---
 
-### 🎨 How to Instantiate & Call Generated UI on the Native Side
+### 🎨 Native Page Navigation & Automated Event Bridge
 
-Once integrated, you can host these generated native elements anywhere within your native codebases using standard container wrappers:
+RenderKit includes a built-in Native Navigation Engine and an automated MethodChannel Event Bridge. You write **0 lines** of MethodChannel or custom native UI-hosting boilerplate.
 
-#### 🤖 Android (Kotlin Compose)
+#### 1. Setup in Dart (`main.dart`)
+Initialize the bridge and register your custom `RenderAction` subclasses in your `main()` function:
 
-The compiler generates a standard `@Composable` function named after your annotated Dart class. You can embed it in a new native activity, or overlay it directly on top of your existing `FlutterActivity`:
+```dart
+import 'package:flutter/material.dart';
+import 'package:render_kit_flutter/render_kit.dart';
 
-##### Option A: Open as a Native Activity
-Create a native `ComponentActivity` (e.g. `MyComposeActivity.kt`) to render the view as a full native screen:
-```kotlin
-package com.example.testingnativeside
+void main() {
+  // 1. Initialize the native event bridge listener
+  RenderKit.initialize();
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
+  // 2. Register custom action classes to support `is` type checking
+  RenderKit.registerActions([
+    const AcceptCallAction(),
+    const RejectCallAction(),
+  ]);
 
-class MyComposeActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                // Call the generated Composable function:
-                YourWidgetName(
-                    state = mapOf("variableName" to "Value"),
-                    onEvent = { actionName, args ->
-                        // Handle native click events
-                        println("Clicked: $actionName")
-                    }
-                )
-            }
-        }
-    }
+  runApp(const MyApp());
 }
 ```
 
-##### Option B: Overlay on top of your Flutter view (`MainActivity.kt`)
-Open `MainActivity.kt` and inject a `ComposeView` directly into your main activity's layout structure:
-```kotlin
-package com.example.testingnativeside
+#### 2. Triggering Navigation (Dart)
+To natively open any compiled page on the device, call `navigateTo` in a single line of Dart:
 
-import android.os.Bundle
-import android.view.ViewGroup
-import androidx.compose.ui.platform.ComposeView
-import io.flutter.embedding.android.FlutterActivity
-
-class MainActivity : FlutterActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        val composeView = ComposeView(this).apply {
-            setContent {
-                YourWidgetName(
-                    state = mapOf("variableName" to "Overlay Value"),
-                    onEvent = { actionName, args ->
-                        println("Action triggered: $actionName")
-                    }
-                )
-            }
-        }
-        
-        // Overlay this view on top of the Flutter window
-        addContentView(
-            composeView, 
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
-    }
-}
+```dart
+// Navigates natively to the target page with arguments:
+RenderKit.navigateTo("IncomingCallScreen", {
+  "callerName": "Jane Doe",
+});
 ```
+
+Under the hood, the plugin's generic native routers (`RenderKitActivity` on Android, `RenderKitViewController` on iOS) will automatically lookup and render the matching screen from the generated screen registry.
 
 ---
 
-#### 🍎 iOS (SwiftUI)
+### 📂 How Registries are Generated
 
-The compiler generates a standard SwiftUI `View` struct. Because SwiftUI views cannot be displayed directly by Flutter or UIKit, you must wrap them in a UIKit `UIHostingController` container:
+When you compile your screens, `renderkit_cli` automatically generates global registries inside your Flutter `lib/` directory:
 
-##### Option A: Present as a Native UIViewController
-```swift
-import SwiftUI
-import UIKit
+1. Run the compilation command:
+   ```bash
+   dart run renderkit_cli generate
+   ```
+2. The CLI compiles all views and outputs:
+   * **`lib/RenderKitRegistry.compose.kt`** (mapping Composable layouts).
+   * **`lib/RenderKitRegistry.swift`** (mapping SwiftUI layout views).
 
-class MyNativeViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // 1. Instantiate the generated SwiftUI View
-        let swiftUIView = YourWidgetName(
-            state: ["variableName": "Value"],
-            onEvent: { actionName, args in
-                print("Clicked action: \(actionName)")
-            }
-        )
-        
-        // 2. Wrap it inside a UIHostingController
-        let hostingController = UIHostingController(rootView: swiftUIView)
-        
-        // 3. Add to hierarchy
-        addChild(hostingController)
-        hostingController.view.frame = self.view.bounds
-        self.view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
-    }
-}
-```
-
-##### Option B: Register as a Platform View Factory (Integrate inside Flutter Widget Tree)
-To render this native view inside your Dart widget layout, implement a standard `FlutterPlatformView`:
-```swift
-import Flutter
-import SwiftUI
-
-// Wrapper implementing FlutterPlatformView
-class MySwiftUIPlatformView: NSObject, FlutterPlatformView {
-    private var _view: UIView
-    
-    init(frame: CGRect, arguments args: Any?) {
-        let swiftUIView = YourWidgetName(
-            state: ["variableName": "Value"],
-            onEvent: { actionName, args in
-                // Handle events
-            }
-        )
-        let hostingController = UIHostingController(rootView: swiftUIView)
-        self._view = hostingController.view
-        super.init()
-    }
-    
-    func view() -> UIView {
-        return _view
-    }
-}
-```
+Both registries are compiled into the native targets automatically (via your Gradle `sourceSets` and Xcode group links).
 
 ---
 
@@ -431,7 +347,7 @@ class MySwiftUIPlatformView: NSObject, FlutterPlatformView {
 
 Rather than passing dynamic, non-serializable callbacks, RenderKit operates on a unified broadcast stream:
 
-1. **Emit**: When a user clicks a button on Flutter Preview, iOS, or Android, it emits a structured Action.
+1. **Emit**: When a user clicks a button in either the Flutter Preview, native Compose, or native SwiftUI screen, it automatically emits the action back to Dart.
 2. **Listen**: In your Dart application, listen to the stream to trigger business logic:
 ```dart
 RenderKit.events.listen((event) {

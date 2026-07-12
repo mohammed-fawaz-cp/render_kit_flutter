@@ -186,8 +186,98 @@ void handleGenerate() {
   final result = Process.runSync('dart', ['run', 'build_runner', 'build', '--delete-conflicting-outputs']);
   print(result.stdout);
   print(result.stderr);
-  print('✅ Compilation completed.');
+  
+  if (result.exitCode == 0) {
+    generateRegistries();
+    print('✅ Compilation completed.');
+  } else {
+    print('❌ Compilation failed.');
+  }
 }
+
+void generateRegistries() {
+  print('📦 Generating RenderKit registries...');
+  final libDir = Directory('lib');
+  if (!libDir.existsSync()) {
+    print('  ⚠️ lib/ folder not found. Skipping registry generation.');
+    return;
+  }
+
+  final composeFiles = <File>[];
+  final swiftFiles = <File>[];
+
+  void scan(Directory dir) {
+    for (final entity in dir.listSync(recursive: true)) {
+      if (entity is File) {
+        final path = entity.path;
+        if (path.endsWith('.compose.kt')) {
+          composeFiles.add(entity);
+        } else if (path.endsWith('.swift') && !path.endsWith('RenderKitRegistry.swift')) {
+          swiftFiles.add(entity);
+        }
+      }
+    }
+  }
+
+  scan(libDir);
+
+  final composeScreens = <String>[];
+  for (final file in composeFiles) {
+    final content = file.readAsStringSync();
+    final match = RegExp(r'fun\s+(\w+)\s*\(').firstMatch(content);
+    if (match != null) {
+      composeScreens.add(match.group(1)!);
+    }
+  }
+
+  final swiftScreens = <String>[];
+  for (final file in swiftFiles) {
+    final content = file.readAsStringSync();
+    final match = RegExp(r'struct\s+(\w+)\s*:\s*View').firstMatch(content);
+    if (match != null) {
+      swiftScreens.add(match.group(1)!);
+    }
+  }
+
+  // 1. Write RenderKitRegistry.compose.kt
+  final composeRegistryFile = File(p.join('lib', 'RenderKitRegistry.compose.kt'));
+  final composeBuffer = StringBuffer();
+  composeBuffer.writeln('package com.renderkit.generated');
+  composeBuffer.writeln();
+  composeBuffer.writeln('import androidx.compose.runtime.Composable');
+  composeBuffer.writeln();
+  composeBuffer.writeln('object RenderKitRegistry {');
+  composeBuffer.writeln('    val screens = mapOf<String, @Composable (state: Map<String, Any>, onEvent: (String, Map<String, Any>) -> Unit) -> Unit>(');
+  for (var i = 0; i < composeScreens.length; i++) {
+    final name = composeScreens[i];
+    final comma = (i == composeScreens.length - 1) ? '' : ',';
+    composeBuffer.writeln('        "$name" to { state, onEvent -> $name(state = state, onEvent = onEvent) }$comma');
+  }
+  composeBuffer.writeln('    )');
+  composeBuffer.writeln('}');
+  composeRegistryFile.writeAsStringSync(composeBuffer.toString());
+  print('  ✅ Generated RenderKitRegistry.compose.kt with ${composeScreens.length} screen(s).');
+
+  // 2. Write RenderKitRegistry.swift
+  final swiftRegistryFile = File(p.join('lib', 'RenderKitRegistry.swift'));
+  final swiftBuffer = StringBuffer();
+  swiftBuffer.writeln('import SwiftUI');
+  swiftBuffer.writeln();
+  swiftBuffer.writeln('struct RenderKitRegistry {');
+  swiftBuffer.writeln('    static let screens: [String: ([String: Any], @escaping (String, [String: Any]) -> Void) -> AnyView] = [');
+  for (var i = 0; i < swiftScreens.length; i++) {
+    final name = swiftScreens[i];
+    final comma = (i == swiftScreens.length - 1) ? '' : ',';
+    swiftBuffer.writeln('        "$name": { state, onEvent in');
+    swiftBuffer.writeln('            AnyView($name(state: state, onEvent: onEvent))');
+    swiftBuffer.writeln('        }$comma');
+  }
+  swiftBuffer.writeln('    ]');
+  swiftBuffer.writeln('}');
+  swiftRegistryFile.writeAsStringSync(swiftBuffer.toString());
+  print('  ✅ Generated RenderKitRegistry.swift with ${swiftScreens.length} screen(s).');
+}
+
 
 void handlePreview() {
   print('📱 Spinning up Flutter Preview server...');

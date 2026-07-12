@@ -3,7 +3,10 @@ import '../ir.dart';
 class ComposeGenerator {
   String generate(String className, IRWidget rootWidget) {
     final buffer = StringBuffer();
+    buffer.writeln('package com.renderkit.generated');
+    buffer.writeln();
     buffer.writeln('import androidx.compose.runtime.*');
+
     buffer.writeln('import androidx.compose.ui.*');
     buffer.writeln('import androidx.compose.foundation.layout.*');
     buffer.writeln('import androidx.compose.material3.*');
