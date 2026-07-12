@@ -103,15 +103,22 @@ void handleDoctor() {
   final androidDir = Directory('android');
   if (androidDir.existsSync()) {
     print('🤖 [Android Environment]');
-    final appBuildGradle = File(p.join('android', 'app', 'build.gradle'));
+    var appBuildGradle = File(p.join('android', 'app', 'build.gradle'));
+    if (!appBuildGradle.existsSync()) {
+      appBuildGradle = File(p.join('android', 'app', 'build.gradle.kts'));
+    }
 
     if (appBuildGradle.existsSync()) {
       final content = appBuildGradle.readAsStringSync();
+      final fileName = p.basename(appBuildGradle.path);
       
       // Check Compose
-      if (!content.contains('buildFeatures') || !content.contains('compose = true')) {
-        print('  ❌ Jetpack Compose is not enabled in android/app/build.gradle.');
-        print('     Fix: Add the following inside android/app/build.gradle `android { ... }` block:');
+      final hasCompose = content.contains('buildFeatures') && 
+          (content.contains('compose = true') || content.contains('compose true') || content.contains('compose.set(true)'));
+
+      if (!hasCompose) {
+        print('  ❌ Jetpack Compose is not enabled in android/app/$fileName.');
+        print('     Fix: Add the following inside android/app/$fileName `android { ... }` block:');
         print('     buildFeatures { compose = true }');
         print('     composeOptions { kotlinCompilerExtensionVersion = "1.5.0" }');
         passes = false;
@@ -121,14 +128,14 @@ void handleDoctor() {
 
       // Check Material3 dependency
       if (!content.contains('androidx.compose.material3:material3')) {
-        print('  ❌ Material3 Compose dependency is missing in android/app/build.gradle.');
+        print('  ❌ Material3 Compose dependency is missing in android/app/$fileName.');
         print('     Fix: Add `implementation("androidx.compose.material3:material3:1.1.0")` in dependencies.');
         passes = false;
       } else {
         print('  ✅ Material3 Compose dependency found.');
       }
     } else {
-      print('  ⚠️ android/app/build.gradle not found. Cannot verify Compose config.');
+      print('  ⚠️ Neither android/app/build.gradle nor build.gradle.kts was found. Cannot verify Compose config.');
     }
   } else {
     print('ℹ️ No Android folder found in current directory.');
