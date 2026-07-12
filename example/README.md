@@ -1,6 +1,6 @@
-# render_kit_example
+# render_kit_flutter_example
 
-Demonstrates how to use the render_kit plugin.
+Demonstrates how to use the render_kit_flutter plugin.
 
 ## Getting Started
 

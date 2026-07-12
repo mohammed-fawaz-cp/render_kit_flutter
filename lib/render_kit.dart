@@ -1,5 +1,3 @@
-library render_kit;
-
 import 'package:renderkit/renderkit.dart' as rk;
 import 'render_kit_platform_interface.dart';
 

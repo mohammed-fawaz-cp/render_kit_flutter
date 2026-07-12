@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:render_kit/render_kit.dart';
-import 'package:render_kit/render_kit_platform_interface.dart';
-import 'package:render_kit/render_kit_method_channel.dart';
+import 'package:render_kit_flutter/render_kit.dart';
+import 'package:render_kit_flutter/render_kit_platform_interface.dart';
+import 'package:render_kit_flutter/render_kit_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockRenderKitPlatform

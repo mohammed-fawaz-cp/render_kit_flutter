@@ -1,9 +1,9 @@
-name: render_kit
+name: render_kit_flutter
 description: A declarative UI compilation framework that translates custom Dart DSL widgets into native Kotlin Jetpack Compose and Swift SwiftUI source code.
 version: 1.0.0
-homepage: https://github.com/mohammed-fawaz-cp/renderkit
-repository: https://github.com/mohammed-fawaz-cp/renderkit
-issue_tracker: https://github.com/mohammed-fawaz-cp/renderkit/issues
+homepage: https://github.com/mohammed-fawaz-cp/render_kit_flutter
+repository: https://github.com/mohammed-fawaz-cp/render_kit_flutter
+issue_tracker: https://github.com/mohammed-fawaz-cp/render_kit_flutter/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -13,6 +13,10 @@ dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
+  renderkit: ^0.1.0
+  renderkit_annotations: ^0.1.0
+
+dependency_overrides:
   renderkit:
     path: ./renderkit
   renderkit_annotations:

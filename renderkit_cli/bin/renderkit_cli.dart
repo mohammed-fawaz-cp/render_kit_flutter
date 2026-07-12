@@ -103,7 +103,6 @@ void handleDoctor() {
   final androidDir = Directory('android');
   if (androidDir.existsSync()) {
     print('🤖 [Android Environment]');
-    final buildGradle = File(p.join('android', 'build.gradle'));
     final appBuildGradle = File(p.join('android', 'app', 'build.gradle'));
 
     if (appBuildGradle.existsSync()) {

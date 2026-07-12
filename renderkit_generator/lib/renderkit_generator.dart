@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'package:build/build.dart';
-import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:source_gen/source_gen.dart';
-import 'package:renderkit_annotations/renderkit_annotations.dart';
 import 'src/parser.dart';
 import 'src/generators/compose_generator.dart';
 import 'src/generators/swiftui_generator.dart';
@@ -20,7 +17,6 @@ class RenderKitBuilder implements Builder {
     if (!await resolver.isLibrary(buildStep.inputId)) return;
     
     final library = await resolver.libraryFor(buildStep.inputId);
-    final libraryReader = LibraryReader(library);
 
     final composeGen = ComposeGenerator();
     final swiftGen = SwiftUIGenerator();

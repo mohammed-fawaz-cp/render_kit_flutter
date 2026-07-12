@@ -1,9 +1,9 @@
 name: renderkit
 description: Custom DSL and Flutter preview components for RenderKit.
 version: 0.1.0
-homepage: https://github.com/renderkit/render_kit/tree/main/renderkit
-repository: https://github.com/renderkit/render_kit
-issue_tracker: https://github.com/renderkit/render_kit/issues
+homepage: https://github.com/mohammed-fawaz-cp/render_kit_flutter/tree/main/renderkit
+repository: https://github.com/mohammed-fawaz-cp/render_kit_flutter
+issue_tracker: https://github.com/mohammed-fawaz-cp/render_kit_flutter/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,5 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  renderkit_annotations: ^0.1.0
+
+dependency_overrides:
   renderkit_annotations:
     path: ../renderkit_annotations

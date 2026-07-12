@@ -53,7 +53,7 @@ Add the dependencies to your application's `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  render_kit:
+  render_kit_flutter:
     path: path/to/render_kit
 
 dev_dependencies:
@@ -67,7 +67,7 @@ Define a screen in `lib/incoming_call_screen.dart`:
 
 ```dart
 import 'package:flutter/widgets.dart';
-import 'package:render_kit/render_kit.dart';
+import 'package:render_kit_flutter/render_kit.dart';
 
 // Declare Event Actions
 class AcceptCallAction extends RenderAction {
@@ -140,7 +140,7 @@ Instantiate the widget inside your Flutter app using the preview wrapper:
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:render_kit/render_kit.dart';
+import 'package:render_kit_flutter/render_kit.dart';
 import 'incoming_call_screen.dart';
 
 class PreviewContainer extends StatelessWidget {

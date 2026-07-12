@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:render_kit/render_kit.dart';
+import 'package:render_kit_flutter/render_kit.dart';
 
 void main() {
   runApp(const MyApp());

@@ -259,8 +259,6 @@ class SwiftUIGenerator {
       if (color is IRProperty) {
         final colorVal = color.properties['value'];
         if (colorVal is int) {
-          final hex = colorVal.toRadixString(16).padLeft(8, '0');
-          // Format Color using hex
           final r = ((colorVal >> 16) & 0xFF) / 255.0;
           final g = ((colorVal >> 8) & 0xFF) / 255.0;
           final b = (colorVal & 0xFF) / 255.0;

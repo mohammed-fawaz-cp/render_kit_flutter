@@ -8,7 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  render_kit:
+  render_kit_flutter:
     path: ../
   renderkit:
     path: ../renderkit

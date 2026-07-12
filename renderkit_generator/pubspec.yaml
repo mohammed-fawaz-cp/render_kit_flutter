@@ -1,9 +1,9 @@
 name: renderkit_generator
 description: Code generator package for RenderKit compiling DSL to Compose and SwiftUI.
 version: 0.1.0
-homepage: https://github.com/renderkit/render_kit/tree/main/renderkit_generator
-repository: https://github.com/renderkit/render_kit
-issue_tracker: https://github.com/renderkit/render_kit/issues
+homepage: https://github.com/mohammed-fawaz-cp/render_kit_flutter/tree/main/renderkit_generator
+repository: https://github.com/mohammed-fawaz-cp/render_kit_flutter
+issue_tracker: https://github.com/mohammed-fawaz-cp/render_kit_flutter/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -14,6 +14,9 @@ dependencies:
   analyzer: '>=5.0.0 <7.0.0'
   code_builder: ^4.5.0
   path: ^1.8.0
+  renderkit_annotations: ^0.1.0
+
+dependency_overrides:
   renderkit_annotations:
     path: ../renderkit_annotations
 

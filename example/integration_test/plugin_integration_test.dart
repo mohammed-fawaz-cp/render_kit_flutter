@@ -9,7 +9,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'package:render_kit/render_kit.dart';
+import 'package:render_kit_flutter/render_kit.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
