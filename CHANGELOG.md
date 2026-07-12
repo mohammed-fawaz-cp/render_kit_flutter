@@ -1,3 +1,7 @@
+## 1.1.3
+
+* Add Kotlin 2.0 and Compose Compiler Gradle plugin support for `render_kit_flutter` Android compilation.
+
 ## 1.1.2
 
 * Specify namespace in `android/build.gradle` for Android Gradle Plugin (AGP) 8.0+ compatibility.
