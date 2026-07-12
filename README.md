@@ -16,10 +16,11 @@ It also includes a high-fidelity **Flutter Preview Renderer** to support fast ho
    * [Step 2: Create a Declarative UI](#step-2-create-a-declarative-ui)
    * [Step 3: Run the Compiler](#step-3-run-the-compiler)
    * [Step 4: Preview in Flutter](#step-4-preview-in-flutter)
-4. [Event & Stream Pipeline](#-event--stream-pipeline)
-5. [Diagnostics & Validator (RenderKit Doctor)](#-diagnostics--validator-renderkit-doctor)
-6. [Supported Widgets](#-supported-widgets)
-7. [Contributing Guide](#-contributing-guide)
+4. [Native Platform Setup](#-native-platform-setup)
+5. [Event & Stream Pipeline](#-event--stream-pipeline)
+6. [CLI Toolchain & Commands](#-cli-toolchain--commands)
+7. [Supported Widgets](#-supported-widgets)
+8. [Contributing Guide](#-contributing-guide)
 
 ---
 
@@ -166,6 +167,74 @@ class PreviewContainer extends StatelessWidget {
 
 ---
 
+## 📱 Native Platform Setup
+
+Before building your application for Android or iOS, the native project files must be configured to support rendering RenderKit's native components (Jetpack Compose for Android and SwiftUI for iOS).
+
+### 🤖 Android (Jetpack Compose & Material 3)
+
+By default, standard Flutter apps do not have Jetpack Compose enabled. You must enable it in your Android app-level build configuration.
+
+Depending on your Flutter version, configure either Groovy DSL or Kotlin DSL:
+
+#### Option A: Groovy DSL (`android/app/build.gradle`)
+Open `android/app/build.gradle` and append/modify the following blocks:
+```groovy
+android {
+    // ... existing configurations
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        // Must match your project's Kotlin compiler compatibility
+        kotlinCompilerExtensionVersion '1.5.0'
+    }
+}
+
+dependencies {
+    // Add Material 3 Compose dependency
+    implementation 'androidx.compose.material3:material3:1.1.0'
+}
+```
+
+#### Option B: Kotlin DSL (`android/app/build.gradle.kts`)
+Open `android/app/build.gradle.kts` and append/modify the following blocks:
+```kotlin
+android {
+    // ... existing configurations
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        // Must match your project's Kotlin compiler compatibility
+        kotlinCompilerExtensionVersion = "1.5.0"
+    }
+}
+
+dependencies {
+    // Add Material 3 Compose dependency
+    implementation("androidx.compose.material3:material3:1.1.0")
+}
+```
+
+---
+
+### 🍎 iOS (SwiftUI iOS 13+ Target)
+
+SwiftUI requires a minimum deployment target of **iOS 13.0** or later.
+
+1. Open `ios/Podfile` and verify/update the platform version constraint at the top:
+   ```ruby
+   platform :ios, '13.0'
+   ```
+2. Open your project in Xcode and update the **Minimum Deployments** target under the Target build settings to `13.0`.
+
+---
+
 ## 🔄 Event & Stream Pipeline
 
 Rather than passing dynamic, non-serializable callbacks, RenderKit operates on a unified broadcast stream:
@@ -214,31 +283,6 @@ dart run renderkit_cli <command> [arguments]
   ```bash
   dart run renderkit_cli doctor
   ```
-  
-  ##### Manual Android Gradle Configuration
-  If the doctor check flags errors or if you need to configure Jetpack Compose manually:
-  
-  * **Groovy DSL (`android/app/build.gradle`)**:
-    ```groovy
-    android {
-        buildFeatures { compose true }
-        composeOptions { kotlinCompilerExtensionVersion '1.5.0' }
-    }
-    dependencies {
-        implementation 'androidx.compose.material3:material3:1.1.0'
-    }
-    ```
-    
-  * **Kotlin DSL (`android/app/build.gradle.kts`)**:
-    ```kotlin
-    android {
-        buildFeatures { compose = true }
-        composeOptions { kotlinCompilerExtensionVersion = "1.5.0" }
-    }
-    dependencies {
-        implementation("androidx.compose.material3:material3:1.1.0")
-    }
-    ```
 * **`generate`**: Manually triggers the compiler to parse `@RenderEntry` widgets and output native `.compose.kt` and `.swift` files.
   ```bash
   dart run renderkit_cli generate
