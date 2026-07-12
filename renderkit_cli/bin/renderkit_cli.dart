@@ -239,8 +239,14 @@ void generateRegistries() {
     }
   }
 
+  // Create target directory if missing
+  final targetDir = Directory(p.join('lib', 'render_kit_ui'));
+  if (!targetDir.existsSync()) {
+    targetDir.createSync(recursive: true);
+  }
+
   // 1. Write RenderKitRegistry.compose.kt
-  final composeRegistryFile = File(p.join('lib', 'RenderKitRegistry.compose.kt'));
+  final composeRegistryFile = File(p.join('lib', 'render_kit_ui', 'RenderKitRegistry.compose.kt'));
   final composeBuffer = StringBuffer();
   composeBuffer.writeln('package com.renderkit.generated');
   composeBuffer.writeln();
@@ -256,10 +262,10 @@ void generateRegistries() {
   composeBuffer.writeln('    )');
   composeBuffer.writeln('}');
   composeRegistryFile.writeAsStringSync(composeBuffer.toString());
-  print('  ✅ Generated RenderKitRegistry.compose.kt with ${composeScreens.length} screen(s).');
+  print('  ✅ Generated RenderKitRegistry.compose.kt inside lib/render_kit_ui/ with ${composeScreens.length} screen(s).');
 
   // 2. Write RenderKitRegistry.swift
-  final swiftRegistryFile = File(p.join('lib', 'RenderKitRegistry.swift'));
+  final swiftRegistryFile = File(p.join('lib', 'render_kit_ui', 'RenderKitRegistry.swift'));
   final swiftBuffer = StringBuffer();
   swiftBuffer.writeln('import SwiftUI');
   swiftBuffer.writeln();
@@ -275,7 +281,7 @@ void generateRegistries() {
   swiftBuffer.writeln('    ]');
   swiftBuffer.writeln('}');
   swiftRegistryFile.writeAsStringSync(swiftBuffer.toString());
-  print('  ✅ Generated RenderKitRegistry.swift with ${swiftScreens.length} screen(s).');
+  print('  ✅ Generated RenderKitRegistry.swift inside lib/render_kit_ui/ with ${swiftScreens.length} screen(s).');
 }
 
 

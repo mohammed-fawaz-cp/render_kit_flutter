@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:render_kit_flutter/render_kit.dart';
 
 void main() {
+  RenderKit.initialize();
+  RenderKit.registerActions([
+    const AcceptCallAction(),
+    const RejectCallAction(),
+  ]);
   runApp(const MyApp());
 }
 

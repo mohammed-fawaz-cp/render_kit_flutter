@@ -1,3 +1,5 @@
+package com.renderkit.generated
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.foundation.layout.*

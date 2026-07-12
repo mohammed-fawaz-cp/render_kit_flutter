@@ -51,23 +51,23 @@ The workspace consists of specialized packages structured for modularity and eas
 ## ⚡ Quick Start Guide
 
 ### Step 1: Install Dependencies
-Add the dependencies to your application's `pubspec.yaml`:
+Add the dependencies to your application's `pubspec.yaml` using the published packages from [pub.dev](https://pub.dev):
 
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
-  render_kit_flutter:
-    path: path/to/render_kit
+  render_kit_flutter: ^1.1.0
 
 dev_dependencies:
   build_runner: ^2.4.0
-  renderkit_generator:
-    path: path/to/render_kit/renderkit_generator
+  renderkit_generator: ^0.1.1
 ```
 
 ### Step 2: Create a Declarative UI
-Define a screen in `lib/incoming_call_screen.dart`:
+Create a directory named `lib/render_kit_ui/` in your Flutter application to store your compiled UI files. 
+
+Define a screen inside `lib/render_kit_ui/incoming_call_screen.dart`:
 
 ```dart
 import 'package:flutter/widgets.dart';
@@ -247,14 +247,14 @@ SwiftUI requires a minimum deployment target of **iOS 13.0** or later.
 
 ### 🔗 Integrating Generated Native Code
 
-When you compile your Dart widgets (via `dart run build_runner build` or `dart run renderkit_cli generate`), RenderKit generates native UI source files inside your Flutter project's `lib/` directory:
-- `lib/incoming_call_screen.compose.kt`
-- `lib/incoming_call_screen.swift`
+When you compile your Dart widgets (via `dart run build_runner build` or `dart run renderkit_cli generate`), RenderKit generates native UI source files inside your `lib/render_kit_ui/` directory:
+- `lib/render_kit_ui/incoming_call_screen.compose.kt`
+- `lib/render_kit_ui/incoming_call_screen.swift`
 
 Here is how to integrate these generated files into your native build pipelines:
 
 #### Android: Automatic Compilation via SourceSets
-Instead of manually copying the generated `.kt` files into your native folders, configure Gradle to treat the Flutter `lib/` folder as a Kotlin source directory:
+Instead of manually copying the generated `.kt` files into your native folders, configure Gradle to treat the `lib/render_kit_ui/` folder as a Kotlin source directory:
 
 * **For Kotlin DSL (`android/app/build.gradle.kts`)**:
   Add the following inside the `android { ... }` block:
@@ -262,7 +262,7 @@ Instead of manually copying the generated `.kt` files into your native folders, 
   android {
       // ... existing configurations
       sourceSets {
-          getByName("main").java.srcDirs("src/main/java", "../../lib")
+          getByName("main").java.srcDirs("src/main/java", "../../lib/render_kit_ui")
       }
   }
   ```
@@ -272,7 +272,7 @@ Instead of manually copying the generated `.kt` files into your native folders, 
   android {
       // ... existing configurations
       sourceSets {
-          main.java.srcDirs += '../../lib'
+          main.java.srcDirs += '../../lib/render_kit_ui'
       }
   }
   ```
@@ -280,7 +280,7 @@ Instead of manually copying the generated `.kt` files into your native folders, 
 #### iOS: Drag & Drop Reference in Xcode
 To compile the generated `.swift` files:
 1. Open the `ios/` folder of your project in Xcode.
-2. Drag and drop the generated Swift files (e.g. `lib/incoming_call_screen.swift`) into the Xcode file navigator under the `Runner` group.
+2. Drag and drop the generated Swift files (e.g. `lib/render_kit_ui/incoming_call_screen.swift`) into the Xcode file navigator under the `Runner` group.
 3. In the popup that appears:
    - **Uncheck** "Copy items if needed" (this ensures Xcode references the files in-place, meaning it automatically picks up updates when you re-compile/re-generate).
    - Select **"Create groups"**.
