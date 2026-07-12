@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import com.renderkit.generated.RenderKitRegistry
 
 class RenderKitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,6 +12,17 @@ class RenderKitActivity : ComponentActivity() {
 
         val screenName = intent.getStringExtra("screen_name") ?: ""
         val state = (intent.getSerializableExtra("state") as? HashMap<String, Any>) ?: hashMapMapOf()
+
+        // Dynamically invoke generated registry initializer if map is empty
+        if (RenderKitRegistry.screens.isEmpty()) {
+            try {
+                val clazz = Class.forName("com.renderkit.generated.RenderKitRegistryInitializer")
+                val method = clazz.getMethod("initialize")
+                method.invoke(null)
+            } catch (e: Exception) {
+                // Registry not compiled yet or not found
+            }
+        }
 
         setContent {
             MaterialTheme {

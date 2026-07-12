@@ -1,3 +1,7 @@
+## 0.1.3
+
+* Update generation to output dynamic `RenderKitRegistryInitializer` runtime mapping to support clean multi-module compiles and prevent circular dependency errors.
+
 ## 0.1.2
 
 * Automatically scan compiled screen layout files and generate global `RenderKitRegistry.compose.kt` and `RenderKitRegistry.swift` files under `lib/` during generation.

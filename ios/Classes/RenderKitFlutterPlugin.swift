@@ -1,8 +1,13 @@
 import Flutter
 import UIKit
 
+import SwiftUI
+
 public class RenderKitFlutterPlugin: NSObject, FlutterPlugin {
   private static var channel: FlutterMethodChannel?
+  
+  public typealias ScreenBuilder = ([String: Any], @escaping (String, [String: Any]) -> Void) -> AnyView
+  public static var screens: [String: ScreenBuilder] = [:]
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     channel = FlutterMethodChannel(name: "render_kit_flutter", binaryMessenger: registrar.messenger())
@@ -17,6 +22,12 @@ public class RenderKitFlutterPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    if RenderKitFlutterPlugin.screens.isEmpty {
+      if let initializerClass = NSClassFromString("Runner.RenderKitRegistryInitializer") as? NSObject.Type {
+        _ = initializerClass.perform(Selector(("initialize")))
+      }
+    }
+
     switch call.method {
     case "navigateTo":
       guard let args = call.arguments as? [String: Any],

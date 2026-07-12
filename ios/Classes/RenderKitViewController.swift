@@ -20,7 +20,7 @@ class RenderKitViewController: UIViewController {
     self.view.backgroundColor = .white
 
     // Look up and render the SwiftUI View from the registry
-    if let viewBuilder = RenderKitRegistry.screens[screenName] {
+    if let viewBuilder = RenderKitFlutterPlugin.screens[screenName] {
       let swiftUIView = viewBuilder(state) { actionName, args in
         // Forward SwiftUI actions to Dart
         RenderKitFlutterPlugin.emit(actionName: actionName, args: args)

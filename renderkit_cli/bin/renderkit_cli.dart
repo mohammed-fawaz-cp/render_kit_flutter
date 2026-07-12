@@ -252,14 +252,19 @@ void generateRegistries() {
   composeBuffer.writeln();
   composeBuffer.writeln('import androidx.compose.runtime.Composable');
   composeBuffer.writeln();
-  composeBuffer.writeln('object RenderKitRegistry {');
-  composeBuffer.writeln('    val screens = mapOf<String, @Composable (state: Map<String, Any>, onEvent: (String, Map<String, Any>) -> Unit) -> Unit>(');
+  composeBuffer.writeln('object RenderKitRegistryInitializer {');
+  composeBuffer.writeln('    @JvmStatic');
+  composeBuffer.writeln('    fun initialize() {');
+  composeBuffer.writeln('        com.mohammed_fawaz_cp.render_kit_flutter.RenderKitRegistry.screens.putAll(');
+  composeBuffer.writeln('            mapOf<String, @Composable (state: Map<String, Any>, onEvent: (String, Map<String, Any>) -> Unit) -> Unit>(');
   for (var i = 0; i < composeScreens.length; i++) {
     final name = composeScreens[i];
     final comma = (i == composeScreens.length - 1) ? '' : ',';
-    composeBuffer.writeln('        "$name" to { state, onEvent -> $name(state = state, onEvent = onEvent) }$comma');
+    composeBuffer.writeln('                "$name" to { state, onEvent -> $name(state = state, onEvent = onEvent) }$comma');
   }
-  composeBuffer.writeln('    )');
+  composeBuffer.writeln('            )');
+  composeBuffer.writeln('        )');
+  composeBuffer.writeln('    }');
   composeBuffer.writeln('}');
   composeRegistryFile.writeAsStringSync(composeBuffer.toString());
   print('  ✅ Generated RenderKitRegistry.compose.kt inside lib/render_kit_ui/ with ${composeScreens.length} screen(s).');
@@ -268,17 +273,20 @@ void generateRegistries() {
   final swiftRegistryFile = File(p.join('lib', 'render_kit_ui', 'RenderKitRegistry.swift'));
   final swiftBuffer = StringBuffer();
   swiftBuffer.writeln('import SwiftUI');
+  swiftBuffer.writeln('import render_kit_flutter');
   swiftBuffer.writeln();
-  swiftBuffer.writeln('struct RenderKitRegistry {');
-  swiftBuffer.writeln('    static let screens: [String: ([String: Any], @escaping (String, [String: Any]) -> Void) -> AnyView] = [');
+  swiftBuffer.writeln('@objc public class RenderKitRegistryInitializer: NSObject {');
+  swiftBuffer.writeln('    @objc public static func initialize() {');
+  swiftBuffer.writeln('        RenderKitFlutterPlugin.screens = [');
   for (var i = 0; i < swiftScreens.length; i++) {
     final name = swiftScreens[i];
     final comma = (i == swiftScreens.length - 1) ? '' : ',';
-    swiftBuffer.writeln('        "$name": { state, onEvent in');
-    swiftBuffer.writeln('            AnyView($name(state: state, onEvent: onEvent))');
-    swiftBuffer.writeln('        }$comma');
+    swiftBuffer.writeln('            "$name": { state, onEvent in');
+    swiftBuffer.writeln('                AnyView($name(state: state, onEvent: onEvent))');
+    swiftBuffer.writeln('            }$comma');
   }
-  swiftBuffer.writeln('    ]');
+  swiftBuffer.writeln('        ]');
+  swiftBuffer.writeln('    }');
   swiftBuffer.writeln('}');
   swiftRegistryFile.writeAsStringSync(swiftBuffer.toString());
   print('  ✅ Generated RenderKitRegistry.swift inside lib/render_kit_ui/ with ${swiftScreens.length} screen(s).');
