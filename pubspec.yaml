@@ -1,6 +1,6 @@
 name: render_kit_flutter
 description: A declarative UI compilation framework that translates custom Dart DSL widgets into native Kotlin Jetpack Compose and Swift SwiftUI source code.
-version: 1.1.6
+version: 1.1.7
 homepage: https://github.com/mohammed-fawaz-cp/render_kit_flutter
 repository: https://github.com/mohammed-fawaz-cp/render_kit_flutter
 issue_tracker: https://github.com/mohammed-fawaz-cp/render_kit_flutter/issues

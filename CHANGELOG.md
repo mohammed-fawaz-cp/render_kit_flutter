@@ -1,3 +1,7 @@
+## 1.1.7
+
+* Update README.md with comprehensive widget properties table listing all 20 layout, display, control, decoration, and visibility components.
+
 ## 1.1.6
 
 * Update README.md with detailed documentation for dynamic screen registration, initialization APIs, and FCM background notification guidelines.
