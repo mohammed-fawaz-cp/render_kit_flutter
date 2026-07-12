@@ -499,11 +499,30 @@ dart run renderkit_cli doctor
 
 ## 🎨 Supported Widgets (v1 Initial Release)
 
-* **Layouts**: `RenderColumn`, `RenderRow`, `RenderStack`, `RenderContainer`, `RenderPadding`, `RenderSpacer`, `RenderExpanded`, `RenderAlign`, `RenderCenter`, `RenderPositioned`
-* **Displays**: `RenderText`, `RenderImage`, `RenderIcon`, `RenderDivider`
-* **Controls**: `RenderButton`, `RenderIconButton`
-* **Decorations**: `RenderCard`, `RenderCircleAvatar`
-* **Visibility / Conditions**: `RenderVisibility`, `RenderIf`, `RenderSwitch`, `RenderResponsive`
+| Category | Widget | Constructor & Key Properties |
+| --- | --- | --- |
+| **Layouts** | `RenderColumn` | `RenderColumn({ required List<RenderWidget> children, RenderAlignment alignment })` <br> • `children`: List of child elements <br> • `alignment`: Default `RenderAlignment.topCenter` |
+| | `RenderRow` | `RenderRow({ required List<RenderWidget> children, RenderAlignment alignment })` <br> • `children`: List of child elements <br> • `alignment`: Default `RenderAlignment.centerLeft` |
+| | `RenderStack` | `RenderStack({ required List<RenderWidget> children })` |
+| | `RenderContainer` | `RenderContainer({ RenderWidget? child, RenderDecoration? decoration, RenderConstraints? constraints, dynamic width, dynamic height })` <br> • Supports `width`, `height`, and decoration styling |
+| | `RenderPadding` | `RenderPadding({ required RenderInsets padding, required RenderWidget child })` <br> • Insets child contents |
+| | `RenderSpacer` | `RenderSpacer()` <br> • Expands to fill empty flex spaces |
+| | `RenderExpanded` | `RenderExpanded({ required RenderWidget child, int flex })` |
+| | `RenderAlign` | `RenderAlign({ required RenderAlignment alignment, required RenderWidget child })` |
+| | `RenderCenter` | `RenderCenter({ required RenderWidget child })` |
+| | `RenderPositioned` | `RenderPositioned({ required RenderWidget child, double? left, double? top, double? right, double? bottom })` <br> • Position offsets inside `RenderStack` |
+| **Displays** | `RenderText` | `RenderText(dynamic text, { RenderTextStyle? style })` <br> • Supports text strings or `RenderBind<String>` dynamic variables |
+| | `RenderImage` | `RenderImage(dynamic source)` <br> • Loads images from URL or asset pathways |
+| | `RenderIcon` | `RenderIcon(String name, { RenderColor? color, double? size })` <br> • Standard vector system icons |
+| | `RenderDivider` | `RenderDivider({ RenderColor? color, double thickness })` |
+| **Controls** | `RenderButton` | `RenderButton({ required RenderAction action, RenderWidget? child, dynamic text })` <br> • Clicking dispatches `action` events back to Dart |
+| | `RenderIconButton` | `RenderIconButton({ required RenderAction action, required RenderIcon icon })` |
+| **Decorations** | `RenderCard` | `RenderCard({ required RenderWidget child, RenderDecoration? decoration })` <br> • Rounded corners and shadow elevation wrapper |
+| | `RenderCircleAvatar`| `RenderCircleAvatar({ dynamic backgroundImage, double radius })` |
+| **Visibility & Conditionals** | `RenderVisibility` | `RenderVisibility({ required dynamic visible, required RenderWidget child })` <br> • `visible`: Boolean visibility state or binding |
+| | `RenderIf` | `RenderIf({ required dynamic condition, required RenderWidget trueChild, required RenderWidget falseChild })` |
+| | `RenderSwitch` | `RenderSwitch({ required dynamic value, required Map<String, RenderWidget> cases, required RenderWidget defaultChild })` |
+| | `RenderResponsive` | `RenderResponsive({ required RenderWidget mobile, RenderWidget? tablet, RenderWidget? desktop })` |
 
 ---
 
