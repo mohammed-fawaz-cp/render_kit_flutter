@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:renderkit/renderkit.dart' as rk;
 import 'render_kit_platform_interface.dart';
@@ -23,6 +24,7 @@ class RenderKit {
 
   /// Initializes the RenderKit event listener to bridge native clicks back to Dart automatically.
   static void initialize() {
+    WidgetsFlutterBinding.ensureInitialized();
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'emitEvent') {
         final name = call.arguments['name'] as String;

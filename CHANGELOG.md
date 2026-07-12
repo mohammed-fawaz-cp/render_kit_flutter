@@ -1,3 +1,7 @@
+## 1.1.5
+
+* Automatically call `WidgetsFlutterBinding.ensureInitialized()` in `RenderKit.initialize()` to prevent binary messenger platform channel setup crash.
+
 ## 1.1.4
 
 * Implement dynamic runtime initializer registration on Android and iOS to solve circular/multi-module compiler dependency limitations.
