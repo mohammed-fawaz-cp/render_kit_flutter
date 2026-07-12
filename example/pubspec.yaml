@@ -28,5 +28,11 @@ dev_dependencies:
   renderkit_cli:
     path: ../renderkit_cli
 
+dependency_overrides:
+  renderkit:
+    path: ../renderkit
+  renderkit_annotations:
+    path: ../renderkit_annotations
+
 flutter:
   uses-material-design: true

@@ -290,40 +290,137 @@ To compile the generated `.swift` files:
 
 ### 🎨 How to Instantiate & Call Generated UI on the Native Side
 
-Once integrated, you can instantiate and render these generated native elements anywhere within your native codebases:
+Once integrated, you can host these generated native elements anywhere within your native codebases using standard container wrappers:
 
 #### 🤖 Android (Kotlin Compose)
-The generator produces a standard `@Composable` function named after your annotated Dart class. It accepts a `state` map (to inject current variables) and an `onEvent` callback (to emit actions back to Dart):
 
+The compiler generates a standard `@Composable` function named after your annotated Dart class. You can embed it in a new native activity, or overlay it directly on top of your existing `FlutterActivity`:
+
+##### Option A: Open as a Native Activity
+Create a native `ComponentActivity` (e.g. `MyComposeActivity.kt`) to render the view as a full native screen:
 ```kotlin
-import androidx.compose.runtime.*
+package com.example.testingnativeside
 
-// Inside your Jetpack Compose activity/view:
-YourWidgetName(
-    state = mapOf("variableName" to "Value"),
-    onEvent = { actionName, args ->
-        // Handle action click natively or pipe it back to Flutter
-        println("Native clicked Action: $actionName")
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+
+class MyComposeActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                // Call the generated Composable function:
+                YourWidgetName(
+                    state = mapOf("variableName" to "Value"),
+                    onEvent = { actionName, args ->
+                        // Handle native click events
+                        println("Clicked: $actionName")
+                    }
+                )
+            }
+        }
     }
-)
+}
 ```
 
-#### 🍎 iOS (SwiftUI)
-The generator produces a standard SwiftUI `View` struct. It also accepts a `state` dictionary and an `onEvent` callback:
+##### Option B: Overlay on top of your Flutter view (`MainActivity.kt`)
+Open `MainActivity.kt` and inject a `ComposeView` directly into your main activity's layout structure:
+```kotlin
+package com.example.testingnativeside
 
+import android.os.Bundle
+import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        val composeView = ComposeView(this).apply {
+            setContent {
+                YourWidgetName(
+                    state = mapOf("variableName" to "Overlay Value"),
+                    onEvent = { actionName, args ->
+                        println("Action triggered: $actionName")
+                    }
+                )
+            }
+        }
+        
+        // Overlay this view on top of the Flutter window
+        addContentView(
+            composeView, 
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
+    }
+}
+```
+
+---
+
+#### 🍎 iOS (SwiftUI)
+
+The compiler generates a standard SwiftUI `View` struct. Because SwiftUI views cannot be displayed directly by Flutter or UIKit, you must wrap them in a UIKit `UIHostingController` container:
+
+##### Option A: Present as a Native UIViewController
 ```swift
 import SwiftUI
+import UIKit
 
-// Inside your SwiftUI view controller or layout:
-struct MyNativeView: View {
-    var body: some View {
-        YourWidgetName(
+class MyNativeViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 1. Instantiate the generated SwiftUI View
+        let swiftUIView = YourWidgetName(
             state: ["variableName": "Value"],
             onEvent: { actionName, args in
-                // Handle action click natively
-                print("Native clicked Action: \(actionName)")
+                print("Clicked action: \(actionName)")
             }
         )
+        
+        // 2. Wrap it inside a UIHostingController
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        
+        // 3. Add to hierarchy
+        addChild(hostingController)
+        hostingController.view.frame = self.view.bounds
+        self.view.addSubview(hostingController.view)
+        hostingController.didMove(toParent: self)
+    }
+}
+```
+
+##### Option B: Register as a Platform View Factory (Integrate inside Flutter Widget Tree)
+To render this native view inside your Dart widget layout, implement a standard `FlutterPlatformView`:
+```swift
+import Flutter
+import SwiftUI
+
+// Wrapper implementing FlutterPlatformView
+class MySwiftUIPlatformView: NSObject, FlutterPlatformView {
+    private var _view: UIView
+    
+    init(frame: CGRect, arguments args: Any?) {
+        let swiftUIView = YourWidgetName(
+            state: ["variableName": "Value"],
+            onEvent: { actionName, args in
+                // Handle events
+            }
+        )
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        self._view = hostingController.view
+        super.init()
+    }
+    
+    func view() -> UIView {
+        return _view
     }
 }
 ```
