@@ -1,3 +1,7 @@
+## 1.1.2
+
+* Specify namespace in `android/build.gradle` for Android Gradle Plugin (AGP) 8.0+ compatibility.
+
 ## 1.1.1
 
 * Fix example app `main.dart` code to properly call `RenderKit.initialize` and `RenderKit.registerActions`.
