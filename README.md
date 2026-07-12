@@ -288,6 +288,48 @@ To compile the generated `.swift` files:
 
 ---
 
+### 🎨 How to Instantiate & Call Generated UI on the Native Side
+
+Once integrated, you can instantiate and render these generated native elements anywhere within your native codebases:
+
+#### 🤖 Android (Kotlin Compose)
+The generator produces a standard `@Composable` function named after your annotated Dart class. It accepts a `state` map (to inject current variables) and an `onEvent` callback (to emit actions back to Dart):
+
+```kotlin
+import androidx.compose.runtime.*
+
+// Inside your Jetpack Compose activity/view:
+IncomingCallScreen(
+    state = mapOf("callerName" to "John Doe"),
+    onEvent = { actionName, args ->
+        // Handle action click natively or pipe it back to Flutter
+        println("Native clicked Action: $actionName")
+    }
+)
+```
+
+#### 🍎 iOS (SwiftUI)
+The generator produces a standard SwiftUI `View` struct. It also accepts a `state` dictionary and an `onEvent` callback:
+
+```swift
+import SwiftUI
+
+// Inside your SwiftUI view controller or layout:
+struct NativeCallView: View {
+    var body: some View {
+        IncomingCallScreen(
+            state: ["callerName": "John Doe"],
+            onEvent: { actionName, args in
+                // Handle action click natively
+                print("Native clicked Action: \(actionName)")
+            }
+        )
+    }
+}
+```
+
+---
+
 ## 🔄 Event & Stream Pipeline
 
 Rather than passing dynamic, non-serializable callbacks, RenderKit operates on a unified broadcast stream:
