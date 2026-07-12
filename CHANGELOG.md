@@ -1,3 +1,9 @@
+## 1.1.4
+
+* Implement dynamic runtime initializer registration on Android and iOS to solve circular/multi-module compiler dependency limitations.
+* Replace Theme.AppCompat resource themes with built-in Android DeviceDefault themes to prevent linking errors.
+* Import `activity-compose` library to resolve `setContent` compile errors.
+
 ## 1.1.3
 
 * Add Kotlin 2.0 and Compose Compiler Gradle plugin support for `render_kit_flutter` Android compilation.
