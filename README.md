@@ -518,11 +518,24 @@ dart run renderkit_cli doctor
 | **Controls** | `RenderButton` | `RenderButton({ required RenderAction action, RenderWidget? child, dynamic text })` <br> • Clicking dispatches `action` events back to Dart |
 | | `RenderIconButton` | `RenderIconButton({ required RenderAction action, required RenderIcon icon })` |
 | **Decorations** | `RenderCard` | `RenderCard({ required RenderWidget child, RenderDecoration? decoration })` <br> • Rounded corners and shadow elevation wrapper |
-| | `RenderCircleAvatar`| `RenderCircleAvatar({ dynamic backgroundImage, double radius })` |
+| | `RenderCircleAvatar`| `RenderCircleAvatar({ dynamic backgroundImage, double radius, RenderColor? backgroundColor, RenderColor? foregroundColor })` <br> • `backgroundImage`: Network URL or local asset <br> • `backgroundColor` / `foregroundColor`: Custom avatar colors |
 | **Visibility & Conditionals** | `RenderVisibility` | `RenderVisibility({ required dynamic visible, required RenderWidget child })` <br> • `visible`: Boolean visibility state or binding |
 | | `RenderIf` | `RenderIf({ required dynamic condition, required RenderWidget trueChild, required RenderWidget falseChild })` |
 | | `RenderSwitch` | `RenderSwitch({ required dynamic value, required Map<String, RenderWidget> cases, required RenderWidget defaultChild })` |
 | | `RenderResponsive` | `RenderResponsive({ required RenderWidget mobile, RenderWidget? tablet, RenderWidget? desktop })` |
+
+### 🎨 Helper Property Classes
+
+| Class | Constructor & Key Properties | Description |
+| --- | --- | --- |
+| `RenderColor` | `RenderColor(int value)` <br> • e.g., `RenderColor(0xFF4A154B)` | Wraps 32-bit AARRGGBB hex color values. |
+| `RenderInsets` | • `RenderInsets.all(double value)` <br> • `RenderInsets.symmetric({double vertical, double horizontal})` <br> • `RenderInsets.only({double left, double top, double right, double bottom})` | Defines layout edge offsets and padding. |
+| `RenderBorderRadius`| `RenderBorderRadius(double value)` | Defines box corner rounding radius. |
+| `RenderBorder` | `RenderBorder({ required RenderColor color, double width })` | Defines border styling. |
+| `RenderTextStyle` | `RenderTextStyle({ RenderColor? color, double? fontSize, bool bold, bool italic })` | Configures typography styling. |
+| `RenderDecoration` | `RenderDecoration({ RenderColor? color, RenderBorder? border, RenderBorderRadius? borderRadius, List<RenderShadow>? shadows, dynamic backgroundImage })` | Configures backgrounds, borders, shadows, and backdrop images. |
+| `RenderShadow` | `RenderShadow({ required RenderColor color, double blurRadius, double offsetX, double offsetY })` | Configures element elevation drop shadows. |
+| `RenderConstraints`| `RenderConstraints({ double? minWidth, double? maxWidth, double? minHeight, double? maxHeight })` | Lay-out size boundary constraints. |
 
 ---
 

@@ -1,3 +1,8 @@
+## 1.2.0
+
+* Update README.md with comprehensive documentation for Helper Property Classes (`RenderColor`, `RenderInsets`, `RenderBorderRadius`, `RenderBorder`, `RenderTextStyle`, `RenderDecoration`, `RenderShadow`, `RenderConstraints`) and their parameters.
+* Update `RenderCircleAvatar` attributes listing in README.md.
+
 ## 1.1.9
 
 * Support native layout generation and compiling for `RenderPositioned`, `RenderSwitch`, and `RenderResponsive` widgets.
