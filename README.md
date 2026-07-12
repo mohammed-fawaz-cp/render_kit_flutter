@@ -57,11 +57,12 @@ Add the dependencies to your application's `pubspec.yaml` using the published pa
 dependencies:
   flutter:
     sdk: flutter
-  render_kit_flutter: ^1.1.0
+  render_kit_flutter: ^1.1.5
 
 dev_dependencies:
   build_runner: ^2.4.0
-  renderkit_generator: ^0.1.1
+  renderkit_generator: ^0.1.2
+  renderkit_cli: ^0.1.4
 ```
 
 ### Step 2: Create a Declarative UI
@@ -160,6 +161,52 @@ class PreviewContainer extends StatelessWidget {
               'callerName': 'John Doe',
             },
             child: IncomingCallScreen(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Step 5: Initialize and Launch Native Screens
+To connect the native event pipeline and dynamically launch screens, configure RenderKit inside your application's `main()` function:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:render_kit_flutter/render_kit.dart';
+import 'incoming_call_screen.dart';
+
+void main() {
+  // 1. Initialize the native MethodChannel bridge
+  RenderKit.initialize();
+
+  // 2. Register custom action classes so `is` type checks function correctly
+  RenderKit.registerActions([
+    const AcceptCallAction(),
+    const RejectCallAction(),
+  ]);
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text("RenderKit App")),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              // Navigates instantly to the compiled native screen:
+              RenderKit.navigateTo("IncomingCallScreen", {
+                "callerName": "John Doe",
+              });
+            },
+            child: const Text("Launch Native Incoming Call Screen 📞"),
           ),
         ),
       ),
@@ -365,6 +412,25 @@ RenderEventListener(
 )
 ```
 
+### 🔔 Background Services & FCM Notifications
+Because RenderKit screens are compiled down to **pure native view layouts** (Jetpack Compose / SwiftUI), they can render independently of the main Flutter UI engine!
+
+This makes it incredibly simple to pop up full-screen native incoming call UI overlays directly from background VoIP services or background isolates (such as FCM `onBackgroundMessage`):
+
+```dart
+import 'package:render_kit_flutter/render_kit.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // 1. Initialize MethodChannel inside the background isolate
+  RenderKit.initialize();
+
+  // 2. Launch the native screen instantly in a single line:
+  RenderKit.navigateTo("IncomingCallScreen", {
+    "callerName": message.data["callerName"] ?? "VoIP Caller",
+  });
+}
+```
 
 ---
 
